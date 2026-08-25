@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // The repo sits inside a parent directory that also has a lockfile; pin the
+  // workspace root so Turbopack stops guessing.
+  turbopack: { root: __dirname },
+}
 
-export default nextConfig;
+export default nextConfig

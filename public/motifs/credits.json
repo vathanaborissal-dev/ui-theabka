@@ -1,0 +1,68 @@
+{
+  "$comment": "One entry per motif file. Keeps provenance with the asset so a licence question is answerable later.",
+  "assets": [
+    {
+      "file": "couple/southeast-asian-couple.png",
+      "source": "https://www.pngwing.com/en/free-png-nejkp",
+      "license": "To be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "frames/kbach-gold-frame.png",
+      "source": "https://in.pinterest.com/pin/frame-kbach-khmer--14214555067764087/",
+      "license": "To be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "dividers/gold-floral-border.png",
+      "source": "https://www.citypng.com/photo/24938/gold-floral-border-image-png",
+      "license": "To be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "references/khmer-frame-reference.jpg",
+      "source": "https://in.pinterest.com/pin/khmer-wedding-invitation-card-frame-corner-collection-free-vector-httpbitly2ulelzx--19351473392913867/",
+      "license": "Reference image only; to be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "dividers/gold-geometric-border.png",
+      "source": "https://toppng.com/show_download/45807/gold-decorative-border",
+      "license": "To be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "dividers/gold-southeast-asian-divider.png",
+      "source": "https://www.pinterest.com/pin/828310556500802707/",
+      "license": "To be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "seals/khmer-unalom.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Khmer_Sacred_Symbol,_Om_or_Unalom.svg",
+      "license": "CC0 1.0 Universal Public Domain Dedication",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "references/gold-ornate-frame.jpg",
+      "source": "https://www.pngfind.com/mpng/ihxJoh_golden-frame-transparent-png-png/",
+      "license": "To be reviewed by project owner",
+      "author": "Unknown",
+      "purchasedOn": ""
+    },
+    {
+      "file": "references/kbach-vector-collection.jpg",
+      "source": "https://5khmer.blogspot.com/2011/08/kbach-khmer-angkor-in-vector-ai.html",
+      "license": "Reference image only; to be reviewed by project owner",
+      "author": "Victor Graphic",
+      "purchasedOn": ""
+    }
+  ]
+}

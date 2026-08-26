@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RsvpBadge } from "@/components/shared/status-badge"
 import { GuestRowMenu } from "./guest-row-menu"
 import { useLocale } from "@/components/providers/locale-provider"
-import { formatMoney, formatNumber, initials } from "@/lib/format"
+import { formatMoney, formatNumber, initials, telegramHref } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { EventRecord, Guest } from "@/lib/types"
 
@@ -57,6 +57,7 @@ export function GuestTable({
             <Th className="min-w-[10rem]">{t("guests.field.family")}</Th>
             <Th className="w-20 text-right">{t("guests.field.partySize")}</Th>
             <Th className="w-36">{t("guests.field.rsvp")}</Th>
+            <Th className="w-28">{t("guests.field.phone")}</Th>
             <Th className="w-28 text-right">{t("guests.field.gift")}</Th>
             <th scope="col" className="w-12 pr-4">
               <span className="sr-only">{t("common.more")}</span>
@@ -69,7 +70,7 @@ export function GuestTable({
             {group.label ? (
               <tr>
                 <th
-                  colSpan={7}
+                  colSpan={8}
                   scope="colgroup"
                   className="border-b border-border bg-muted/50 px-4 py-1.5 text-left"
                 >
@@ -141,6 +142,22 @@ export function GuestTable({
 
                   <td className="py-2.5 pr-3">
                     <RsvpBadge status={guest.rsvp} />
+                  </td>
+
+                  <td className="py-2.5 pr-3">
+                    {guest.phone ? (
+                      <a
+                        href={telegramHref(guest.phone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                        title="Open in Telegram"
+                      >
+                        {guest.phone}
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
                   </td>
 
                   <td className="tnum py-2.5 pr-3 text-right">

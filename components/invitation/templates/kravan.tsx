@@ -70,7 +70,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
         </div>
       </header>
 
-      <InvSection>
+      <InvSection align="left">
         <div className="mx-auto max-w-md rounded-2xl border border-(--inv-border) bg-(--inv-surface) p-8 text-center">
           <p className="text-sm leading-relaxed text-(--inv-muted)">{L(design.greeting)}</p>
           <p className="mt-4 text-base leading-loose text-(--inv-fg)">{L(design.message)}</p>
@@ -79,42 +79,42 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
           </div>
         </div>
         <div className="mt-12">
-          <InvitationCountdown date={event.date} />
+          <InvitationCountdown variant="boxed" date={event.date} />
         </div>
       </InvSection>
 
       {design.showGallery && design.gallery.length > 0 ? (
-        <InvSection title={t("inv.gallery")} ornament="rule">
+        <InvSection align="left" title={t("inv.gallery")} ornament="rule">
           <GalleryStrip photos={design.gallery} />
         </InvSection>
       ) : null}
 
       {design.showSchedule && event.schedule.length > 0 ? (
-        <InvSection title={t("public.scheduleTitle")} ornament="rule">
+        <InvSection align="left" title={t("public.scheduleTitle")} ornament="rule">
           <div className="mx-auto max-w-lg rounded-2xl border border-(--inv-border) bg-(--inv-surface) p-6 @xl:p-8">
-            <InvitationSchedule items={event.schedule} />
+            <InvitationSchedule items={event.schedule} variant="cards" />
           </div>
         </InvSection>
       ) : null}
 
-      <InvSection title={t("public.venueTitle")} ornament="rule">
-        <InvitationVenue venue={event.venue} showMap={design.showMap} />
+      <InvSection align="left" title={t("public.venueTitle")} ornament="rule">
+        <InvitationVenue variant="split" venue={event.venue} showMap={design.showMap} />
       </InvSection>
 
       {design.showGiftInfo && design.giftNote ? (
-        <InvSection title={t("public.giftTitle")} ornament="rule">
+        <InvSection align="left" title={t("public.giftTitle")} ornament="rule">
           <GiftNote note={design.giftNote} />
         </InvSection>
       ) : null}
 
       {design.showRsvp ? (
-        <InvSection id="rsvp" title={t("public.rsvpTitle")} ornament="rule">
+        <InvSection align="left" id="rsvp" title={t("public.rsvpTitle")} ornament="rule">
           <InvitationRsvpForm event={event} guestName={guestName} />
         </InvSection>
       ) : null}
 
       {event.contacts.length > 0 ? (
-        <InvSection title={t("public.contactHosts")} ornament="rule">
+        <InvSection align="left" title={t("public.contactHosts")} ornament="rule">
           <ContactList contacts={event.contacts} />
         </InvSection>
       ) : null}

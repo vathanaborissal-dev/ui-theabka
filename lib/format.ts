@@ -16,6 +16,18 @@ export function toKhmerDigits(input: string | number) {
   return String(input).replace(/\d/g, (d) => KHMER_DIGITS[Number(d)])
 }
 
+/**
+ * Telegram only resolves `t.me/+<countrycode><number>` links, not local
+ * formats — so a Cambodian "012 345 678" needs its leading 0 swapped for 855.
+ */
+export function telegramHref(phone: string) {
+  const digits = phone.replace(/\D/g, "")
+  const withCountryCode = digits.startsWith("855")
+    ? digits
+    : `855${digits.replace(/^0/, "")}`
+  return `https://t.me/+${withCountryCode}`
+}
+
 export function formatNumber(value: number, locale: Locale = "en") {
   const formatted = new Intl.NumberFormat("en-US").format(value)
   return locale === "km" ? toKhmerDigits(formatted) : formatted

@@ -5,7 +5,7 @@ import { ButtonLink } from "@/components/ui/button-link"
 import { SegmentedBar } from "@/components/shared/segmented-bar"
 import { AreaTrend, type TrendPoint } from "@/components/charts/area-trend"
 import { useLocale } from "@/components/providers/locale-provider"
-import { formatNumber } from "@/lib/format"
+import { formatDate, formatNumber } from "@/lib/format"
 import { guestStats } from "@/lib/stats"
 import type { EventRecord, Guest } from "@/lib/types"
 
@@ -63,9 +63,9 @@ export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest
                         </span>
                       </dd>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="h-1.5 w-full overflow-hidden rounded-sm bg-muted">
                       <div
-                        className="h-full rounded-full bg-primary/70"
+                        className="h-full rounded-r-[4px] bg-primary/70"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -80,7 +80,10 @@ export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest
             <AreaTrend
               points={trend}
               caption="Cumulative replies received per day"
-              height={72}
+              formatLabel={(label) => formatDate(label, locale, "dayMonth")}
+              formatValue={(value) =>
+                `${formatNumber(value, locale)} ${t("dash.repliesSoFar").toLowerCase()}`
+              }
             />
             <p className="mt-2 text-xs text-muted-foreground">
               {formatNumber(stats.confirmed + stats.declined + stats.maybe, locale)}{" "}

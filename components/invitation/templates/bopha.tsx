@@ -106,7 +106,7 @@ export function BophaTemplate({ event, guestName }: TemplateProps) {
           {L(design.message)}
         </p>
         <div className="mt-10">
-          <InvitationCountdown date={event.date} />
+          <InvitationCountdown variant="row" date={event.date} />
         </div>
         <p className="mt-8 text-center">
           <AddToCalendar event={event} />
@@ -115,12 +115,12 @@ export function BophaTemplate({ event, guestName }: TemplateProps) {
 
       {design.showSchedule && event.schedule.length > 0 ? (
         <InvSection title={t("public.scheduleTitle")} ornament="kbach" className="bg-(--inv-surface)">
-          <InvitationSchedule items={event.schedule} />
+          <InvitationSchedule items={event.schedule} variant="plain" />
         </InvSection>
       ) : null}
 
       <InvSection title={t("public.venueTitle")} ornament="kbach">
-        <InvitationVenue venue={event.venue} showMap={design.showMap} />
+        <InvitationVenue variant="left" venue={event.venue} showMap={design.showMap} />
       </InvSection>
 
       {design.showGallery && design.gallery.length > 0 ? (

@@ -5,6 +5,7 @@ import { useLocale } from "@/components/providers/locale-provider"
 import { useHasMounted, useReducedMotion } from "./motion"
 import { KbachDivider } from "./ornaments"
 import { Romduol } from "./khmer-ornaments"
+import { Motif } from "./motif"
 import { formatDate } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { EventRecord } from "@/lib/types"
@@ -183,7 +184,14 @@ export function EnvelopeIntro({
               opening && "opacity-0"
             )}
           >
-            <Romduol className="size-8" />
+            {/* The unalom is the sacred mark stamped on Khmer ceremonial
+                documents — the right thing to press into wax. Falls back to
+                the drawn romduol if the artwork is ever removed. */}
+            <Motif
+              assetId="khmer-unalom"
+              fallback={<Romduol className="size-8" />}
+              className="h-12 w-9"
+            />
             <span className="sr-only">{t("public.tapToOpen")}</span>
           </button>
         </div>

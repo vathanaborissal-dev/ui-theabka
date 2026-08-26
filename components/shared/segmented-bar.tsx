@@ -10,6 +10,10 @@ export type Segment = {
 /**
  * A single stacked bar for part-to-whole status. Chosen over a pie chart —
  * four RSVP buckets read faster on one line, and it survives a phone width.
+ *
+ * Segments are separated by a 2px gap in the surface colour rather than a
+ * border: a stroke around each fill would add ink that isn't data, and reads
+ * heavier at small sizes.
  */
 export function SegmentedBar({
   segments,
@@ -25,23 +29,25 @@ export function SegmentedBar({
   height?: string
 }) {
   const safeTotal = total || 1
+  const visible = segments.filter((s) => s.value > 0)
 
   return (
     <div className={cn("space-y-3", className)}>
       <div
-        className={cn("flex w-full overflow-hidden rounded-full bg-muted", height)}
+        className={cn("flex w-full gap-0.5 overflow-hidden rounded-full bg-muted", height)}
         role="img"
         aria-label={segments.map((s) => `${s.label}: ${s.value}`).join(", ")}
       >
-        {segments
-          .filter((s) => s.value > 0)
-          .map((s) => (
-            <div
-              key={s.key}
-              className={cn("h-full transition-[width] duration-500 ease-out", s.className)}
-              style={{ width: `${(s.value / safeTotal) * 100}%` }}
-            />
-          ))}
+        {visible.map((s) => (
+          <div
+            key={s.key}
+            className={cn(
+              "h-full rounded-full transition-[width] duration-500 ease-out",
+              s.className
+            )}
+            style={{ width: `${(s.value / safeTotal) * 100}%` }}
+          />
+        ))}
       </div>
 
       {showLegend ? (

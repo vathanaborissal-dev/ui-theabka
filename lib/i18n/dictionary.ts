@@ -144,6 +144,7 @@ export const en = {
   "gifts.pending": "Awaiting gift",
   "gifts.sizes": "Gift sizes",
   "gifts.trend": "Replies over time",
+  "dash.repliesSoFar": "replies",
   "gifts.awaitingHelp": "Confirmed guests with no gift recorded yet. Choose a name to record one.",
   "gifts.tier.under": "$20 & under",
   "gifts.tier.t50": "$21 – $50",
@@ -340,6 +341,10 @@ export const en = {
   "common.more": "More",
   "common.person": "person",
   "common.people": "people",
+  "inv.divider": "Divider",
+  "inv.crest": "Crest",
+  "account.label": "Account",
+  "account.signedIn": "Signed in as",
 } as const
 
 export type DictKey = keyof typeof en
@@ -486,6 +491,7 @@ export const km: Record<DictKey, string> = {
   "gifts.pending": "មិនទាន់ទទួល",
   "gifts.sizes": "ទំហំចំណងដៃ",
   "gifts.trend": "ការឆ្លើយតបតាមពេលវេលា",
+  "dash.repliesSoFar": "ការឆ្លើយតប",
   "gifts.awaitingHelp": "ភ្ញៀវដែលបានបញ្ជាក់ ប៉ុន្តែមិនទាន់មានកត់ត្រាចំណងដៃ។ សូមជ្រើសរើសឈ្មោះដើម្បីកត់ត្រា។",
   "gifts.tier.under": "$២០ និងក្រោម",
   "gifts.tier.t50": "$២១ – $៥០",
@@ -682,6 +688,10 @@ export const km: Record<DictKey, string> = {
   "common.more": "បន្ថែម",
   "common.person": "នាក់",
   "common.people": "នាក់",
+  "inv.divider": "បន្ទាត់តុបតែង",
+  "inv.crest": "កំពូលតុបតែង",
+  "account.label": "គណនី",
+  "account.signedIn": "បានចូលជា",
 }
 
 export const dictionaries = { en, km }

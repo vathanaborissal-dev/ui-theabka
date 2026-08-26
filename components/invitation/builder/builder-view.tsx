@@ -18,7 +18,9 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Input } from "@/components/ui/input"
+import { TimePicker } from "@/components/ui/time-picker"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -30,6 +32,7 @@ import { InvitationRenderer } from "../invitation-renderer"
 import { BilingualField } from "./bilingual-field"
 import {
   CoupleMotifPicker,
+  MotifSlotPicker,
   FontPairingPicker,
   OptionRow,
   OrnamentPicker,
@@ -285,11 +288,10 @@ export function InvitationBuilder({ eventId }: { eventId: string }) {
             />
             <div className="space-y-1.5">
               <Label htmlFor="rsvp-deadline">RSVP deadline</Label>
-              <Input
+              <DatePicker
                 id="rsvp-deadline"
-                type="date"
                 value={design.rsvpDeadline ?? ""}
-                onChange={(e) => set({ rsvpDeadline: e.target.value || undefined })}
+                onChange={(value) => set({ rsvpDeadline: value || undefined })}
               />
             </div>
             {design.showGiftInfo ? (
@@ -316,6 +318,24 @@ export function InvitationBuilder({ eventId }: { eventId: string }) {
               <CoupleMotifPicker
                 value={design.coupleMotifId}
                 onChange={(coupleMotifId) => set({ coupleMotifId })}
+              />
+            </Section>
+
+            <Section title={t("inv.divider")}>
+              <MotifSlotPicker
+                category="dividers"
+                value={design.dividerMotifId}
+                onChange={(dividerMotifId) => set({ dividerMotifId })}
+                drawnLabel={t("inv.coupleDrawn")}
+              />
+            </Section>
+
+            <Section title={t("inv.crest")}>
+              <MotifSlotPicker
+                category="frames"
+                value={design.crestMotifId}
+                onChange={(crestMotifId) => set({ crestMotifId })}
+                drawnLabel={t("common.none")}
               />
             </Section>
 
@@ -600,12 +620,11 @@ function ScheduleEditor({
             />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex gap-2">
-                <Input
-                  type="time"
+                <TimePicker
                   value={item.time}
                   aria-label="Time"
                   className="w-28 shrink-0"
-                  onChange={(e) => update(item.id, { time: e.target.value })}
+                  onChange={(value) => update(item.id, { time: value })}
                 />
                 <Input
                   value={item.title.en}

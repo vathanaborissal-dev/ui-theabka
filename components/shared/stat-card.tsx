@@ -43,7 +43,7 @@ export function StatCard({
         ) : null}
       </div>
       <div className="space-y-0.5">
-        <p className={cn("display tnum text-[1.75rem] leading-none", toneClass)}>{value}</p>
+        <p className={cn("display text-[1.75rem] leading-none", toneClass)}>{value}</p>
         {sublabel ? <p className="text-xs text-muted-foreground">{sublabel}</p> : null}
       </div>
       {footer}

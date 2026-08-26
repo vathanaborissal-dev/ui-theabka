@@ -116,13 +116,13 @@ export function SbaiTemplate({ event, guestName }: TemplateProps) {
       <div className="relative mt-4 bg-(--inv-bg) text-(--inv-fg)">
         <InvSection>
           <p className="mx-auto max-w-md text-center text-base leading-loose text-(--inv-muted)">{L(design.message)}</p>
-          <div className="mt-10"><InvitationCountdown date={event.date} /></div>
+          <div className="mt-10"><InvitationCountdown variant="boxed" date={event.date} /></div>
           <p className="mt-8 text-center"><AddToCalendar event={event} /></p>
         </InvSection>
 
         {design.showSchedule && event.schedule.length > 0 ? (
           <InvSection title={t("public.scheduleTitle")} ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
-            <InvitationSchedule items={event.schedule} />
+            <InvitationSchedule items={event.schedule} variant="centred" />
           </InvSection>
         ) : null}
 
@@ -133,7 +133,7 @@ export function SbaiTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         <InvSection title={t("public.venueTitle")} ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
-          <InvitationVenue venue={event.venue} showMap={design.showMap} />
+          <InvitationVenue variant="split" venue={event.venue} showMap={design.showMap} />
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (

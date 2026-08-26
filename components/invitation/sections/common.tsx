@@ -7,6 +7,7 @@ import { Reveal } from "@/components/invitation/motion"
 import { InvitationGallery } from "@/components/invitation/gallery"
 import { KbachDivider, LotusMark } from "@/components/invitation/ornaments"
 import { LotusFrieze, Romduol } from "@/components/invitation/khmer-ornaments"
+import { MotifRule } from "@/components/invitation/motif"
 import { cn } from "@/lib/utils"
 import type { ContactPerson, EventRecord } from "@/lib/types"
 
@@ -16,27 +17,30 @@ export function InvSection({
   children,
   className,
   ornament = "none",
+  align = "center",
   id,
 }: {
   title?: string
   children: React.ReactNode
   className?: string
   ornament?: "none" | "kbach" | "lotus" | "rule" | "frieze" | "romduol"
+  /** Ranged-left headings give the formal and editorial templates their voice. */
+  align?: "center" | "left"
   id?: string
 }) {
-  const { entrance = "rise" } = useDesign()
+  const { entrance = "rise", dividerMotifId } = useDesign()
   const motionEnabled = useInvitationMotionEnabled()
 
   return (
     <section id={id} className={cn("px-6 py-12 @xl:py-16", className)}>
       <Reveal entrance={motionEnabled ? entrance : "none"}>
       {title ? (
-        <header className="mb-8 text-center">
+        <header className={cn("mb-8", align === "left" ? "text-left" : "text-center")}>
           {ornament === "lotus" ? (
-            <LotusMark className="mx-auto mb-3 size-5 text-(--inv-gold)" />
+            <LotusMark className={cn("mb-3 size-5 text-(--inv-gold)", align === "center" && "mx-auto")} />
           ) : null}
           {ornament === "romduol" ? (
-            <Romduol className="mx-auto mb-3 size-7 text-(--inv-gold)" />
+            <Romduol className={cn("mb-3 size-7 text-(--inv-gold)", align === "center" && "mx-auto")} />
           ) : null}
           <h2
             className="text-[0.8125rem] tracking-[0.22em] text-(--inv-accent) uppercase"
@@ -45,13 +49,35 @@ export function InvSection({
             {title}
           </h2>
           {ornament === "kbach" ? (
-            <KbachDivider className="mx-auto mt-3 h-4 w-40 text-(--inv-gold)" />
+            <MotifRule
+              assetId={dividerMotifId}
+              className={cn("mt-3", align === "left" && "mx-0")}
+              fallback={
+                <KbachDivider
+                  className={cn("mt-3 h-4 w-40 text-(--inv-gold)", align === "center" && "mx-auto")}
+                />
+              }
+            />
           ) : null}
           {ornament === "frieze" ? (
-            <LotusFrieze className="mx-auto mt-3 h-4 w-48 text-(--inv-gold)" />
+            <MotifRule
+              assetId={dividerMotifId}
+              className={cn("mt-3", align === "left" && "mx-0")}
+              fallback={
+                <LotusFrieze
+                  className={cn("mt-3 h-4 w-48 text-(--inv-gold)", align === "center" && "mx-auto")}
+                />
+              }
+            />
           ) : null}
           {ornament === "rule" ? (
-            <span className="mx-auto mt-3 block h-px w-12 bg-(--inv-accent)/40" aria-hidden="true" />
+            <span
+              className={cn(
+                "mt-3 block h-px w-12 bg-(--inv-accent)/40",
+                align === "center" && "mx-auto"
+              )}
+              aria-hidden="true"
+            />
           ) : null}
         </header>
       ) : null}

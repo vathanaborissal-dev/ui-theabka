@@ -113,6 +113,7 @@ export function ExpensesView({
                   display: formatMoney(row.amount, event.currency, locale),
                   secondary: row.paid,
                   secondaryLabel: t("status.paid"),
+                  secondaryDisplay: formatMoney(row.paid, event.currency, locale),
                 }))}
                 barClassName="bg-primary/25"
                 secondaryClassName="bg-primary"

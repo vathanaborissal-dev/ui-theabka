@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { PHOTO_FRAMES } from "@/components/invitation/photo-frame"
 import { Motif } from "@/components/invitation/motif"
 import { KhmerCouple } from "@/components/invitation/khmer-motifs"
-import { motifsIn } from "@/lib/invitation/motif-assets"
+import { motifsIn, type MotifCategory } from "@/lib/invitation/motif-assets"
 import type { EventType, OrnamentLevel, PhotoFrameId } from "@/lib/types"
 
 export function TemplatePicker({
@@ -543,6 +543,65 @@ export function CoupleMotifPicker({
                   assetId={asset?.id}
                   fallback={<KhmerCouple className="h-full w-auto" />}
                 />
+              </span>
+              <span className="mt-1 block truncate text-center text-[0.6875rem] text-muted-foreground">
+                {item.label}
+              </span>
+            </button>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+/**
+ * Picks supplied artwork for a slot that has a drawn fallback — dividers and
+ * crests. Shows nothing until artwork exists for the category, and always
+ * offers "drawn" as the first option so the hand-drawn motif stays reachable.
+ */
+export function MotifSlotPicker({
+  category,
+  value,
+  onChange,
+  drawnLabel,
+}: {
+  category: MotifCategory
+  value?: string
+  onChange: (id: string | undefined) => void
+  drawnLabel: string
+}) {
+  const { locale } = useLocale()
+  const options = motifsIn(category)
+  if (options.length === 0) return null
+
+  const items = [{ id: undefined as string | undefined, label: drawnLabel }].concat(
+    options.map((asset) => ({ id: asset.id as string | undefined, label: asset.name[locale] }))
+  )
+
+  return (
+    <ul className="grid grid-cols-2 gap-2">
+      {items.map((item) => {
+        const selected = value === item.id
+        return (
+          <li key={item.id ?? "drawn"}>
+            <button
+              type="button"
+              onClick={() => onChange(item.id)}
+              aria-pressed={selected}
+              className={cn(
+                "w-full overflow-hidden rounded-[var(--btn-radius)] border p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                selected
+                  ? "border-primary ring-1 ring-primary"
+                  : "border-border hover:border-foreground/25"
+              )}
+            >
+              <span className="flex h-10 items-center justify-center">
+                {item.id ? (
+                  <Motif assetId={item.id} fallback={null} />
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
               </span>
               <span className="mt-1 block truncate text-center text-[0.6875rem] text-muted-foreground">
                 {item.label}

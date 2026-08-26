@@ -22,24 +22,20 @@ const modeIcons: Record<ThemeMode, typeof Sun> = {
   system: Monitor,
 }
 
-/** Theme family + light/dark, in one menu. */
-export function ThemeMenu({ align = "end" }: { align?: "start" | "center" | "end" }) {
+/**
+ * Theme family + light/dark, without the surrounding menu. Split out so the
+ * same controls can sit in their own dropdown or nested inside the profile
+ * menu, rather than being duplicated.
+ */
+export function ThemeMenuItems() {
   const { theme, setTheme, mode, setMode } = useTheme()
   const { t, locale } = useLocale()
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon" aria-label={t("common.appearance")}>
-            <Palette />
-          </Button>
-        }
-      />
-      <DropdownMenuContent align={align} className="w-64">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>{t("common.theme")}</DropdownMenuLabel>
-          {APP_THEMES.map((item) => (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>{t("common.theme")}</DropdownMenuLabel>
+        {APP_THEMES.map((item) => (
           <DropdownMenuItem
             key={item.id}
             onClick={() => setTheme(item.id)}
@@ -63,14 +59,14 @@ export function ThemeMenu({ align = "end" }: { align?: "start" | "center" | "end
                 {item.description[locale]}
               </span>
             </span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>{t("common.appearance")}</DropdownMenuLabel>
-          <div className="flex gap-1 p-1">
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>{t("common.appearance")}</DropdownMenuLabel>
+        <div className="flex gap-1 p-1">
           {(["light", "dark", "system"] as ThemeMode[]).map((m) => {
             const Icon = modeIcons[m]
             const active = mode === m
@@ -89,11 +85,30 @@ export function ThemeMenu({ align = "end" }: { align?: "start" | "center" | "end
               >
                 <Icon className="size-4" aria-hidden="true" />
                 {t(`common.${m}`)}
-                </button>
-              )
-            })}
-          </div>
-        </DropdownMenuGroup>
+              </button>
+            )
+          })}
+        </div>
+      </DropdownMenuGroup>
+    </>
+  )
+}
+
+/** Theme family + light/dark, in one menu. */
+export function ThemeMenu({ align = "end" }: { align?: "start" | "center" | "end" }) {
+  const { t } = useLocale()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon" aria-label={t("common.appearance")}>
+            <Palette />
+          </Button>
+        }
+      />
+      <DropdownMenuContent align={align} className="w-64">
+        <ThemeMenuItems />
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -129,4 +144,3 @@ export function LanguageToggle({ className }: { className?: string }) {
     </div>
   )
 }
-

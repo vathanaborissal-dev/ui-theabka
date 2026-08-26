@@ -124,6 +124,10 @@ export type InvitationDesign = {
   envelopeIntro?: boolean
   /** Id from MOTIF_ASSETS for the couple illustration; falls back to the drawn pair. */
   coupleMotifId?: string
+  /** Id from MOTIF_ASSETS for section-header rules; falls back to the drawn kbach. */
+  dividerMotifId?: string
+  /** Id from MOTIF_ASSETS for the crest above and below the card. */
+  crestMotifId?: string
   greeting: LocalizedText
   message: LocalizedText
   coverPhoto?: string

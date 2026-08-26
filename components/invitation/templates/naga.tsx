@@ -101,14 +101,14 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
               </div>
             </div>
             <div className="mt-12">
-              <InvitationCountdown date={event.date} />
+              <InvitationCountdown variant="lead" date={event.date} />
             </div>
           </InvSection>
 
           {design.showSchedule && event.schedule.length > 0 ? (
             <InvSection title={t("public.scheduleTitle")} ornament={orn.sectionOrnament}>
               <div className="mx-auto max-w-lg rounded-lg border border-(--inv-gold)/25 bg-(--inv-surface)/85 p-6 @xl:p-8">
-                <InvitationSchedule items={event.schedule} />
+                <InvitationSchedule items={event.schedule} variant="line" />
               </div>
             </InvSection>
           ) : null}
@@ -120,7 +120,7 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
           ) : null}
 
           <InvSection title={t("public.venueTitle")} ornament={orn.sectionOrnament}>
-            <InvitationVenue venue={event.venue} showMap={design.showMap} />
+            <InvitationVenue variant="split" venue={event.venue} showMap={design.showMap} />
           </InvSection>
 
           {design.showGiftInfo && design.giftNote ? (

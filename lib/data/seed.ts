@@ -207,6 +207,9 @@ export const seedEvents: EventRecord[] = [
       ambient: "petals",
       coverMotion: "kenburns",
       envelopeIntro: true,
+      coupleMotifId: "couple-traditional",
+      dividerMotifId: "divider-lotus",
+      crestMotifId: "crest-top",
       greeting: {
         en: "Together with our families",
         km: "ដោយមានការអនុញ្ញាតពីមាតាបិតាទាំងសងខាង",
@@ -305,6 +308,7 @@ export const seedEvents: EventRecord[] = [
       ambient: "petals",
       coverMotion: "float",
       envelopeIntro: true,
+      dividerMotifId: "divider-geometric",
       greeting: { en: "With our families", km: "ជាមួយគ្រួសារយើងខ្ញុំ" },
       message: {
         en: "We are joining our families. Please come and celebrate with us.",

@@ -9,7 +9,6 @@ import {
   MoreHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
-  Search,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
@@ -18,10 +17,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Separator } from "@/components/ui/separator"
 import { useLocale } from "@/components/providers/locale-provider"
 import { Brand, BrandMark } from "./brand"
-import { SidebarSearch } from "./sidebar-search"
-import { useCommandPalette } from "@/components/providers/command-palette-provider"
+import { SearchTrigger } from "./search-trigger"
 import { sidebarStore } from "@/lib/ui-preferences"
 import { EventSwitcher } from "./event-switcher"
+import { ProfileMenu } from "./profile-menu"
 import { LanguageToggle, ThemeMenu } from "./appearance-menu"
 import { CommandPalette } from "./command-palette"
 import { allEventNavItems, eventFooterNav, eventHref, eventNav } from "@/lib/nav"
@@ -29,10 +28,12 @@ import { cn } from "@/lib/utils"
 import type { EventRecord } from "@/lib/types"
 
 /**
- * Two-tier chrome:
- *  – desktop: a persistent sidebar scoped to the current event
- *  – phone: a compact top bar plus a five-slot tab bar, because the people
- *    running a Cambodian wedding are on their phone, standing in a hall.
+ * Three-part chrome:
+ *  – a top bar on every size, holding search and the page-level actions
+ *  – desktop: a persistent sidebar scoped to the current event, ending in the
+ *    profile menu
+ *  – phone: the top bar plus a five-slot tab bar, because the people running a
+ *    Cambodian wedding are on their phone, standing in a hall.
  */
 export function AppShell({
   event,
@@ -42,6 +43,7 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const { t } = useLocale()
+  useSidebarShortcut()
 
   return (
     <div className="flex min-h-svh w-full">
@@ -55,10 +57,10 @@ export function AppShell({
       <DesktopSidebar event={event} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <MobileTopBar event={event} />
+        <TopBar event={event} />
         <main
           id="main"
-          className="flex-1 px-4 pt-5 pb-28 sm:px-6 lg:px-8 lg:pt-8 lg:pb-12"
+          className="flex-1 px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pb-12"
         >
           <div className="mx-auto w-full max-w-6xl">{children}</div>
         </main>
@@ -70,6 +72,32 @@ export function AppShell({
   )
 }
 
+function useSidebarCollapsed() {
+  return (
+    React.useSyncExternalStore(
+      sidebarStore.subscribe,
+      sidebarStore.getSnapshot,
+      sidebarStore.getServerSnapshot
+    ) === "collapsed"
+  )
+}
+
+/** ⌘B / Ctrl+B is the convention for this, and costs nothing to support. */
+function useSidebarShortcut() {
+  React.useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "b") {
+        event.preventDefault()
+        sidebarStore.set(
+          sidebarStore.getSnapshot() === "collapsed" ? "expanded" : "collapsed"
+        )
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
+}
+
 function useIsActive() {
   const pathname = usePathname()
   return React.useCallback(
@@ -77,6 +105,19 @@ function useIsActive() {
       exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`),
     [pathname]
   )
+}
+
+/** Label of the section currently open, for the top bar's breadcrumb. */
+function useSectionLabel(eventId: string) {
+  const pathname = usePathname()
+  const { t } = useLocale()
+  const match = allEventNavItems
+    .filter((item) => item.segment !== "")
+    .find((item) => {
+      const href = eventHref(eventId, item.segment)
+      return pathname === href || pathname.startsWith(`${href}/`)
+    })
+  return t(match?.labelKey ?? "nav.dashboard")
 }
 
 function NavLink({
@@ -145,7 +186,7 @@ function NavSections({
 
   return (
     <nav
-      className={cn("flex flex-col gap-5", collapsed && "items-center gap-4")}
+      className={cn("flex flex-col gap-6", collapsed && "items-center gap-4")}
       aria-label={t("nav.overview")}
     >
       {eventNav.map((group, i) => (
@@ -156,7 +197,7 @@ function NavSections({
               // for words, so the grouping survives the collapse.
               <span className="my-1 h-px w-5 bg-sidebar-border" aria-hidden="true" />
             ) : (
-              <p className="eyebrow px-2.5 pb-1 text-muted-foreground/70">{t(group.labelKey)}</p>
+              <p className="eyebrow px-2.5 pb-2 text-muted-foreground/70">{t(group.labelKey)}</p>
             )
           ) : null}
           {group.items.map((item) => (
@@ -178,30 +219,7 @@ function NavSections({
 
 function DesktopSidebar({ event }: { event: EventRecord }) {
   const { t } = useLocale()
-  const collapsed =
-    React.useSyncExternalStore(
-      sidebarStore.subscribe,
-      sidebarStore.getSnapshot,
-      sidebarStore.getServerSnapshot
-    ) === "collapsed"
-
-  const toggle = () => sidebarStore.set(collapsed ? "expanded" : "collapsed")
-
-  // ⌘B / Ctrl+B is the convention for this, and costs nothing to support.
-  React.useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "b") {
-        event.preventDefault()
-        sidebarStore.set(
-          sidebarStore.getSnapshot() === "collapsed" ? "expanded" : "collapsed"
-        )
-      }
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [])
-
-  const label = t(collapsed ? "sidebar.expand" : "sidebar.collapse")
+  const collapsed = useSidebarCollapsed()
 
   return (
     <aside
@@ -211,192 +229,186 @@ function DesktopSidebar({ event }: { event: EventRecord }) {
         collapsed ? "w-16" : "w-64"
       )}
     >
+      {/* Brand, on the same baseline as the top bar beside it. */}
       <div
         className={cn(
-          "flex h-14 items-center",
-          collapsed ? "justify-center px-2" : "justify-between px-4"
+          "flex h-14 shrink-0 items-center border-b border-sidebar-border",
+          collapsed ? "justify-center px-2" : "px-4"
         )}
       >
         {collapsed ? (
-          <Link href="/events" aria-label="Theabka" className="outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+          <Link
+            href="/events"
+            aria-label="Theabka"
+            className="outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
             <BrandMark />
           </Link>
         ) : (
           <Brand />
         )}
-        {collapsed ? null : (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label={label}>
-                  <PanelLeftClose />
-                </Button>
-              }
-            />
-            <TooltipContent side="right">{label}</TooltipContent>
-          </Tooltip>
-        )}
       </div>
 
-      {collapsed ? (
-        <div className="flex justify-center px-2 pb-1">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label={label}>
-                  <PanelLeftOpen />
-                </Button>
-              }
-            />
-            <TooltipContent side="right">{label}</TooltipContent>
-          </Tooltip>
-        </div>
-      ) : null}
-
-      <div className={cn(collapsed ? "flex justify-center px-2" : "px-3")}>
-        <SidebarSearch collapsed={collapsed} />
-      </div>
-
-      {collapsed ? (
-        <div className="mt-3 flex justify-center px-2">
-          <EventSwitcher current={event} collapsed />
-        </div>
-      ) : (
-        <div className="mt-3 px-3">
-          <div className="rounded-[var(--card-radius)] border border-sidebar-border bg-background/60">
-            <EventSwitcher current={event} />
-          </div>
-        </div>
-      )}
-
-      <div className={cn("flex-1 overflow-y-auto py-5", collapsed ? "px-2" : "px-3")}>
+      <div className={cn("flex-1 overflow-y-auto py-6", collapsed ? "px-2" : "px-3")}>
         <NavSections event={event} collapsed={collapsed} />
+
+        <div
+          className={cn(
+            "mt-6 space-y-1 border-t border-sidebar-border pt-4",
+            collapsed && "flex flex-col items-center"
+          )}
+        >
+          {eventFooterNav.map((item) => (
+            <NavLink
+              key={item.segment}
+              href={eventHref(event.id, item.segment)}
+              exact={false}
+              icon={item.icon}
+              label={t(item.labelKey)}
+              collapsed={collapsed}
+            />
+          ))}
+        </div>
       </div>
 
+      {/* The signed-in planner, and the preferences that hang off them. */}
       <div
         className={cn(
-          "space-y-1 border-t border-sidebar-border py-3",
-          collapsed ? "flex flex-col items-center px-2" : "px-3"
+          "shrink-0 border-t border-sidebar-border p-2",
+          collapsed && "flex justify-center"
         )}
       >
-        {eventFooterNav.map((item) => (
-          <NavLink
-            key={item.segment}
-            href={eventHref(event.id, item.segment)}
-            exact={false}
-            icon={item.icon}
-            label={t(item.labelKey)}
-            collapsed={collapsed}
-          />
-        ))}
-
-        {collapsed ? (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Link
-                  href={`/i/${event.slug}`}
-                  target="_blank"
-                  aria-label={t("inv.openPage")}
-                  className="flex size-9 items-center justify-center rounded-[var(--btn-radius)] text-muted-foreground transition-colors outline-none hover:bg-sidebar-accent/60 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  <ExternalLink className="size-4" />
-                </Link>
-              }
-            />
-            <TooltipContent side="right">{t("inv.openPage")}</TooltipContent>
-          </Tooltip>
-        ) : (
-          <Link
-            href={`/i/${event.slug}`}
-            target="_blank"
-            className="flex items-center gap-2.5 rounded-[var(--btn-radius)] px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors outline-none hover:bg-sidebar-accent/60 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <ExternalLink className="size-4 shrink-0 text-muted-foreground/70" />
-            <span className="truncate">{t("inv.openPage")}</span>
-          </Link>
-        )}
-
-        <Separator className="my-2" />
-
-        {collapsed ? (
-          <ThemeMenu align="start" />
-        ) : (
-          <div className="flex items-center justify-between gap-2 px-1">
-            <LanguageToggle />
-            <ThemeMenu />
-          </div>
-        )}
+        <ProfileMenu collapsed={collapsed} />
       </div>
     </aside>
   )
 }
 
-function MobileTopBar({ event }: { event: EventRecord }) {
-  const { t, L } = useLocale()
-  const [open, setOpen] = React.useState(false)
+/** Collapses and expands the sidebar. Sits in the top bar so it stays put. */
+function SidebarToggle() {
+  const { t } = useLocale()
+  const collapsed = useSidebarCollapsed()
+  const label = t(collapsed ? "sidebar.expand" : "sidebar.collapse")
+  const Icon = collapsed ? PanelLeftOpen : PanelLeftClose
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/85 px-4 backdrop-blur-md lg:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger
-          render={
-            <Button variant="ghost" size="icon" aria-label={t("nav.overview")}>
-              <Menu />
-            </Button>
-          }
-        />
-        <SheetContent side="left" className="w-[17rem] p-0">
-          <SheetTitle className="sr-only">{t("nav.overview")}</SheetTitle>
-          <div className="flex h-14 items-center px-4">
-            <Brand />
-          </div>
-          <div className="px-3">
-            <div className="rounded-[var(--card-radius)] border border-border bg-muted/40">
-              <EventSwitcher current={event} />
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto px-3 py-5">
-            <NavSections event={event} onNavigate={() => setOpen(false)} />
-            <Separator className="my-4" />
-            <div className="space-y-1">
-              {eventFooterNav.map((item) => (
-                <NavLink
-                  key={item.segment}
-                  href={eventHref(event.id, item.segment)}
-                  exact={false}
-                  icon={item.icon}
-                  label={t(item.labelKey)}
-                  onNavigate={() => setOpen(false)}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center justify-between border-t border-border px-4 py-3">
-            <LanguageToggle />
-            <ThemeMenu />
-          </div>
-        </SheetContent>
-      </Sheet>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => sidebarStore.set(collapsed ? "expanded" : "collapsed")}
+            aria-label={label}
+            className="hidden lg:inline-flex"
+          >
+            <Icon />
+          </Button>
+        }
+      />
+      <TooltipContent side="bottom">{label}</TooltipContent>
+    </Tooltip>
+  )
+}
 
-      <p className="min-w-0 flex-1 truncate text-sm font-medium">{L(event.title)}</p>
+/**
+ * Present at every size. On desktop it carries the breadcrumb, search and the
+ * public-page link that used to crowd the sidebar; on phones it also holds the
+ * drawer trigger.
+ */
+function TopBar({ event }: { event: EventRecord }) {
+  const { t, L } = useLocale()
+  const section = useSectionLabel(event.id)
 
-      <MobileSearchButton />
+  return (
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/85 px-4 backdrop-blur-md sm:px-6 lg:px-4">
+      <MobileNavSheet event={event} />
+      <SidebarToggle />
 
-      <ButtonLink href={`/i/${event.slug}`} target="_blank" variant="ghost" size="icon" aria-label={t("inv.openPage")}>
+      {/* Which event you are in, and where inside it. */}
+      <nav
+        aria-label="Breadcrumb"
+        className="hidden min-w-0 flex-1 items-center gap-1.5 text-sm lg:flex"
+      >
+        <EventSwitcher current={event} variant="bar" />
+        <span aria-hidden="true" className="text-muted-foreground/40">
+          /
+        </span>
+        <span className="truncate text-muted-foreground">{section}</span>
+      </nav>
+
+      <p className="min-w-0 flex-1 truncate text-sm font-medium lg:hidden">{L(event.title)}</p>
+
+      <SearchTrigger className="hidden w-56 lg:flex" />
+      <SearchTrigger iconOnly className="lg:hidden" />
+
+      <ButtonLink
+        href={`/i/${event.slug}`}
+        target="_blank"
+        variant="outline"
+        size="sm"
+        className="hidden lg:inline-flex"
+      >
+        <ExternalLink />
+        {t("inv.openPage")}
+      </ButtonLink>
+      <ButtonLink
+        href={`/i/${event.slug}`}
+        target="_blank"
+        variant="ghost"
+        size="icon"
+        aria-label={t("inv.openPage")}
+        className="lg:hidden"
+      >
         <ExternalLink />
       </ButtonLink>
     </header>
   )
 }
 
-function MobileSearchButton() {
-  const { setOpen } = useCommandPalette()
+function MobileNavSheet({ event }: { event: EventRecord }) {
   const { t } = useLocale()
+  const [open, setOpen] = React.useState(false)
+
   return (
-    <Button variant="ghost" size="icon" aria-label={t("cmd.open")} onClick={() => setOpen(true)}>
-      <Search />
-    </Button>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
+        render={
+          <Button variant="ghost" size="icon" aria-label={t("nav.overview")} className="lg:hidden">
+            <Menu />
+          </Button>
+        }
+      />
+      <SheetContent side="left" className="flex w-[17rem] flex-col p-0">
+        <SheetTitle className="sr-only">{t("nav.overview")}</SheetTitle>
+        <div className="flex h-14 shrink-0 items-center border-b border-border px-4">
+          <Brand />
+        </div>
+        <div className="shrink-0 px-3 pt-4">
+          <div className="rounded-[var(--card-radius)] border border-border bg-muted/40">
+            <EventSwitcher current={event} />
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-6">
+          <NavSections event={event} onNavigate={() => setOpen(false)} />
+          <div className="mt-6 space-y-1 border-t border-border pt-4">
+            {eventFooterNav.map((item) => (
+              <NavLink
+                key={item.segment}
+                href={eventHref(event.id, item.segment)}
+                exact={false}
+                icon={item.icon}
+                label={t(item.labelKey)}
+                onNavigate={() => setOpen(false)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="shrink-0 border-t border-border p-2">
+          <ProfileMenu />
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -409,71 +421,69 @@ function MobileTabBar({ event, label }: { event: EventRecord; label: string }) {
   const overflow = allEventNavItems.filter((i) => !i.primary)
 
   return (
-    <>
-      <nav
-        aria-label={t("nav.overview")}
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
-      >
-        <div className="mx-auto flex max-w-md items-stretch">
-          {primary.map((item) => {
-            const href = eventHref(event.id, item.segment)
-            const active = isActive(href, item.segment === "")
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.segment}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.6875rem] font-medium transition-colors outline-none focus-visible:bg-muted",
-                  active ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                <Icon className="size-5" />
-                <span className="max-w-full truncate px-0.5">{t(item.labelKey)}</span>
-              </Link>
-            )
-          })}
+    <nav
+      aria-label={t("nav.overview")}
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+    >
+      <div className="mx-auto flex max-w-md items-stretch">
+        {primary.map((item) => {
+          const href = eventHref(event.id, item.segment)
+          const active = isActive(href, item.segment === "")
+          const Icon = item.icon
+          return (
+            <Link
+              key={item.segment}
+              href={href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.6875rem] font-medium transition-colors outline-none focus-visible:bg-muted",
+                active ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className="size-5" />
+              <span className="max-w-full truncate px-0.5">{t(item.labelKey)}</span>
+            </Link>
+          )
+        })}
 
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger
-              render={
-                <button
-                  type="button"
-                  className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.6875rem] font-medium text-muted-foreground outline-none focus-visible:bg-muted"
-                >
-                  <MoreHorizontal className="size-5" />
-                  <span>{label}</span>
-                </button>
-              }
-            />
-            <SheetContent side="bottom" className="rounded-t-[var(--card-radius)] p-4 pb-8">
-              <SheetTitle className="mb-3 text-sm">{label}</SheetTitle>
-              <div className="grid grid-cols-3 gap-2">
-                {overflow.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <Link
-                      key={item.segment}
-                      href={eventHref(event.id, item.segment)}
-                      onClick={() => setOpen(false)}
-                      className="flex flex-col items-center gap-2 rounded-[var(--card-radius)] border border-border bg-card px-2 py-4 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                    >
-                      <Icon className="size-5 text-primary" />
-                      <span className="text-center">{t(item.labelKey)}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-              <Separator className="my-4" />
-              <div className="flex items-center justify-between">
-                <LanguageToggle />
-                <ThemeMenu align="end" />
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </nav>
-    </>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger
+            render={
+              <button
+                type="button"
+                className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.6875rem] font-medium text-muted-foreground outline-none focus-visible:bg-muted"
+              >
+                <MoreHorizontal className="size-5" />
+                <span>{label}</span>
+              </button>
+            }
+          />
+          <SheetContent side="bottom" className="rounded-t-[var(--card-radius)] p-4 pb-8">
+            <SheetTitle className="mb-3 text-sm">{label}</SheetTitle>
+            <div className="grid grid-cols-3 gap-2">
+              {overflow.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.segment}
+                    href={eventHref(event.id, item.segment)}
+                    onClick={() => setOpen(false)}
+                    className="flex flex-col items-center gap-2 rounded-[var(--card-radius)] border border-border bg-card px-2 py-4 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    <Icon className="size-5 text-primary" />
+                    <span className="text-center">{t(item.labelKey)}</span>
+                  </Link>
+                )
+              })}
+            </div>
+            <Separator className="my-4" />
+            <div className="flex items-center justify-between">
+              <LanguageToggle />
+              <ThemeMenu align="end" />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </nav>
   )
 }

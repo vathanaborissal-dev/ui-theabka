@@ -6,63 +6,79 @@
       "source": "https://www.pngwing.com/en/free-png-nejkp",
       "license": "To be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Checkerboard stripped via edge flood-fill (white jacket preserved); now genuinely transparent. IN USE.",
+      "derivedFile": "couple/couple--traditional.png"
     },
     {
       "file": "frames/kbach-gold-frame.png",
       "source": "https://in.pinterest.com/pin/frame-kbach-khmer--14214555067764087/",
       "license": "To be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Checkerboard stripped and split into top and bottom crest. IN USE.",
+      "derivedFile": "frames/crest--top.png + crest--bottom.png"
     },
     {
       "file": "dividers/gold-floral-border.png",
       "source": "https://www.citypng.com/photo/24938/gold-floral-border-image-png",
       "license": "To be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Checkerboard stripped, trimmed, split into two rules.",
+      "derivedFile": "dividers/divider--floral-band.png + divider--floral-drops.png"
     },
     {
       "file": "references/khmer-frame-reference.jpg",
       "source": "https://in.pinterest.com/pin/khmer-wedding-invitation-card-frame-corner-collection-free-vector-httpbitly2ulelzx--19351473392913867/",
       "license": "Reference image only; to be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Reference only — moved out of public/ to motif-source-originals/."
     },
     {
       "file": "dividers/gold-geometric-border.png",
       "source": "https://toppng.com/show_download/45807/gold-decorative-border",
       "license": "To be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Checkerboard stripped and trimmed to a single band. IN USE (engagement).",
+      "derivedFile": "dividers/divider--geometric.png"
     },
     {
       "file": "dividers/gold-southeast-asian-divider.png",
       "source": "https://www.pinterest.com/pin/828310556500802707/",
       "license": "To be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Trimmed and split; the upper rule is kept. IN USE (wedding).",
+      "derivedFile": "dividers/divider--lotus.png"
     },
     {
       "file": "seals/khmer-unalom.svg",
       "source": "https://commons.wikimedia.org/wiki/File:Khmer_Sacred_Symbol,_Om_or_Unalom.svg",
       "license": "CC0 1.0 Universal Public Domain Dedication",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "CC0, single-colour, re-tinted per palette. IN USE as the envelope seal.",
+      "derivedFile": "seals/khmer-unalom.svg"
     },
     {
       "file": "references/gold-ornate-frame.jpg",
       "source": "https://www.pngfind.com/mpng/ihxJoh_golden-frame-transparent-png-png/",
       "license": "To be reviewed by project owner",
       "author": "Unknown",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Reference only — moved out of public/ to motif-source-originals/."
     },
     {
       "file": "references/kbach-vector-collection.jpg",
       "source": "https://5khmer.blogspot.com/2011/08/kbach-khmer-angkor-in-vector-ai.html",
       "license": "Reference image only; to be reviewed by project owner",
       "author": "Victor Graphic",
-      "purchasedOn": ""
+      "purchasedOn": "",
+      "status": "Reference only — moved out of public/ to motif-source-originals/."
     }
-  ]
+  ],
+  "$status": "Processed 2026-08-26: source PNGs had the transparency checkerboard flattened into the pixels; it was removed programmatically and the results trimmed/split. Untouched originals are in motif-source-originals/ at the project root."
 }

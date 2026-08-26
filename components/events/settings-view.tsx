@@ -3,8 +3,10 @@
 import * as React from "react"
 import { Palette, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { TimePicker } from "@/components/ui/time-picker"
 import {
   Select,
   SelectContent,
@@ -46,14 +48,24 @@ export function SettingsView({ eventId }: { eventId: string }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="set-date">Date &amp; time</Label>
-              <Input
-                id="set-date"
-                type="datetime-local"
-                value={event.date.slice(0, 16)}
-                onChange={(e) =>
-                  updateEvent(event.id, { date: `${e.target.value}:00+07:00` })
-                }
-              />
+              <div className="flex gap-2">
+                <DatePicker
+                  id="set-date"
+                  className="flex-1"
+                  value={event.date.slice(0, 10)}
+                  onChange={(date) =>
+                    updateEvent(event.id, { date: `${date}T${event.date.slice(11, 16)}:00+07:00` })
+                  }
+                />
+                <TimePicker
+                  aria-label="Time"
+                  className="w-32"
+                  value={event.date.slice(11, 16)}
+                  onChange={(value) =>
+                    updateEvent(event.id, { date: `${event.date.slice(0, 10)}T${value}:00+07:00` })
+                  }
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="set-slug">Public link</Label>

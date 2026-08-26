@@ -17,7 +17,21 @@ function subscribeToSeconds(onChange: () => void) {
   return () => clearInterval(id)
 }
 
-export function InvitationCountdown({ date }: { date: string }) {
+export type CountdownVariant = "row" | "boxed" | "lead" | "inline"
+
+export function InvitationCountdown({
+  date,
+  variant = "row",
+}: {
+  date: string
+  /**
+   * How the clock is dressed. Templates pick one so the countdown is not the
+   * same object on every card: "row" is four bare figures, "boxed" sets each
+   * in a ruled cell, "lead" makes the day count the headline with the rest
+   * subordinate, and "inline" collapses to a single quiet line.
+   */
+  variant?: CountdownVariant
+}) {
   const { t, locale } = useLocale()
 
   const now = React.useSyncExternalStore(
@@ -38,6 +52,75 @@ export function InvitationCountdown({ date }: { date: string }) {
     { value: parts.seconds, label: t("public.countdownSeconds") },
   ]
 
+  const figure = (value: number) => (mounted ? formatNumber(value, locale) : "\u2014")
+
+  if (variant === "inline") {
+    return (
+      <p
+        className="text-center text-sm tracking-[0.08em] text-(--inv-muted)"
+        suppressHydrationWarning
+      >
+        {units.map((unit, i) => (
+          <span key={unit.label}>
+            {i > 0 ? <span className="mx-2 text-(--inv-border)">&middot;</span> : null}
+            <span className="tnum font-medium text-(--inv-accent)">{figure(unit.value)}</span>{" "}
+            {unit.label.toLowerCase()}
+          </span>
+        ))}
+      </p>
+    )
+  }
+
+  if (variant === "lead") {
+    const [days, ...rest] = units
+    return (
+      <div className="text-center" suppressHydrationWarning>
+        <p
+          className="tnum text-[clamp(3rem,14cqi,5rem)] leading-none text-(--inv-accent)"
+          style={{ fontFamily: "var(--inv-font-display)" }}
+          suppressHydrationWarning
+        >
+          {figure(days.value)}
+        </p>
+        <p className="mt-2 text-[0.6875rem] tracking-[0.24em] text-(--inv-muted) uppercase">
+          {days.label}
+        </p>
+        <p className="mt-4 text-xs text-(--inv-muted)" suppressHydrationWarning>
+          {rest.map((unit, i) => (
+            <span key={unit.label}>
+              {i > 0 ? <span className="mx-1.5 text-(--inv-border)">&middot;</span> : null}
+              <span className="tnum">{figure(unit.value)}</span> {unit.label.toLowerCase()}
+            </span>
+          ))}
+        </p>
+      </div>
+    )
+  }
+
+  if (variant === "boxed") {
+    return (
+      <div className="flex items-stretch justify-center gap-2 @xl:gap-3" suppressHydrationWarning>
+        {units.map((unit) => (
+          <div
+            key={unit.label}
+            className="min-w-[4.25rem] rounded-[var(--inv-radius,0.5rem)] border border-(--inv-border) bg-(--inv-surface) px-3 py-3 text-center @xl:min-w-[5rem]"
+          >
+            <p
+              className="tnum text-[clamp(1.4rem,5cqi,2rem)] leading-none text-(--inv-accent)"
+              style={{ fontFamily: "var(--inv-font-display)" }}
+              suppressHydrationWarning
+            >
+              {figure(unit.value)}
+            </p>
+            <p className="mt-1.5 text-[0.625rem] tracking-[0.12em] text-(--inv-muted) uppercase">
+              {unit.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="flex items-start justify-center gap-4 @xl:gap-8" suppressHydrationWarning>
       {units.map((unit) => (
@@ -47,7 +130,7 @@ export function InvitationCountdown({ date }: { date: string }) {
             style={{ fontFamily: "var(--inv-font-display)" }}
             suppressHydrationWarning
           >
-            {mounted ? formatNumber(unit.value, locale) : "—"}
+            {figure(unit.value)}
           </p>
           <p className="mt-1.5 text-[0.6875rem] tracking-[0.14em] text-(--inv-muted) uppercase">
             {unit.label}

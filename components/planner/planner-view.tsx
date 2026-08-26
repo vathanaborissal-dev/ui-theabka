@@ -4,6 +4,7 @@ import * as React from "react"
 import { ListChecks, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -154,11 +155,10 @@ export function PlannerView({ eventId }: { eventId: string }) {
             ))}
           </SelectContent>
         </Select>
-        <Input
-          type="date"
+        <DatePicker
           value={draftDate}
-          onChange={(e) => setDraftDate(e.target.value)}
-          aria-label={t("expenses.dueDate")}
+          onChange={setDraftDate}
+          placeholder={t("expenses.dueDate")}
           className="w-40"
         />
         <Button type="submit" disabled={!draft.trim()}>

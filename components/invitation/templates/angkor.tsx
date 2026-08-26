@@ -140,7 +140,7 @@ export function AngkorTemplate({ event, guestName }: TemplateProps) {
             {L(design.message)}
           </p>
           <div className="mt-10">
-            <InvitationCountdown date={event.date} />
+            <InvitationCountdown variant="boxed" date={event.date} />
           </div>
           <p className="mt-8 text-center">
             <AddToCalendar event={event} />
@@ -153,12 +153,12 @@ export function AngkorTemplate({ event, guestName }: TemplateProps) {
             ornament={orn.sectionOrnament}
             className="border-y border-(--inv-gold)/25 bg-(--inv-surface)/70"
           >
-            <InvitationSchedule items={event.schedule} />
+            <InvitationSchedule items={event.schedule} variant="cards" />
           </InvSection>
         ) : null}
 
         <InvSection title={t("public.venueTitle")} ornament={orn.sectionOrnament}>
-          <InvitationVenue venue={event.venue} showMap={design.showMap} />
+          <InvitationVenue variant="centred" venue={event.venue} showMap={design.showMap} />
         </InvSection>
 
         {design.showGallery && design.gallery.length > 0 ? (

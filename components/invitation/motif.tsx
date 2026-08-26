@@ -18,6 +18,7 @@ export function Motif({
   alt = "",
   className,
   tint,
+  fit = "contain",
 }: {
   /** Id from MOTIF_ASSETS; undefined uses the fallback. */
   assetId?: string
@@ -26,6 +27,12 @@ export function Motif({
   className?: string
   /** CSS colour applied to tintable single-colour artwork. */
   tint?: string
+  /**
+   * "contain" letterboxes into the box it is given. "width" lets the artwork
+   * set its own height from its aspect — right for rules and bands, whose
+   * proportions differ from one file to the next.
+   */
+  fit?: "contain" | "width"
 }) {
   const asset = findMotif(assetId)
   const [failed, setFailed] = React.useState(false)
@@ -73,7 +80,33 @@ export function Motif({
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
-      className={cn("block h-full w-full object-contain", className)}
+      className={cn(
+        "block",
+        fit === "width" ? "h-auto w-full" : "h-full w-full object-contain",
+        className
+      )}
     />
+  )
+}
+
+/**
+ * A horizontal rule for a section heading. Supplied divider artwork is wide and
+ * short, so it is given a box to letterbox into rather than a fixed height —
+ * otherwise a tall ornament with a centre medallion gets squashed.
+ */
+export function MotifRule({
+  assetId,
+  fallback,
+  className,
+}: {
+  assetId?: string
+  fallback: React.ReactNode
+  className?: string
+}) {
+  if (!findMotif(assetId)) return <>{fallback}</>
+  return (
+    <span className={cn("mx-auto block w-full max-w-[15rem]", className)}>
+      <Motif assetId={assetId} fallback={fallback} fit="width" />
+    </span>
   )
 }

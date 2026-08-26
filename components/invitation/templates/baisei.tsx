@@ -76,6 +76,13 @@ export function BaiseiTemplate({ event, guestName }: TemplateProps) {
             ) : null}
 
             <div className="relative px-8 pt-10 pb-4 text-center @xl:px-12">
+              {/* A supplied crest sits above the arch when one is chosen; the
+                  baisei still crowns it either way. */}
+              {design.crestMotifId ? (
+                <div className="mx-auto mb-2 h-14 w-64 @xl:h-16">
+                  <Motif assetId={design.crestMotifId} fallback={null} />
+                </div>
+              ) : null}
               {/* Baisei crowning the arch */}
               <Baisei className="mx-auto h-24 w-auto text-(--inv-gold) @xl:h-28" />
 
@@ -133,7 +140,7 @@ export function BaiseiTemplate({ event, guestName }: TemplateProps) {
             {L(design.message)}
           </p>
           <div className="mt-10">
-            <InvitationCountdown date={event.date} />
+            <InvitationCountdown variant="row" date={event.date} />
           </div>
           <p className="mt-8 text-center">
             <AddToCalendar event={event} />
@@ -161,7 +168,7 @@ export function BaiseiTemplate({ event, guestName }: TemplateProps) {
             ornament={orn.sectionOrnament}
             className="bg-(--inv-surface)/70"
           >
-            <InvitationSchedule items={event.schedule} />
+            <InvitationSchedule items={event.schedule} variant="line" />
           </InvSection>
         ) : null}
 
@@ -176,7 +183,7 @@ export function BaiseiTemplate({ event, guestName }: TemplateProps) {
           ornament={orn.sectionOrnament}
           className="bg-(--inv-surface)/70"
         >
-          <InvitationVenue venue={event.venue} showMap={design.showMap} />
+          <InvitationVenue variant="centred" venue={event.venue} showMap={design.showMap} />
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (

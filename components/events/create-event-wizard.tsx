@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, ArrowRight, Cake, Check, Flower2, GraduationCap, Heart, HeartHandshake, Home, PartyPopper, Sparkles, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { TimePicker } from "@/components/ui/time-picker"
 import { Brand } from "@/components/app-shell/brand"
 import { BilingualField } from "@/components/invitation/builder/bilingual-field"
 import { useData } from "@/components/providers/data-provider"
@@ -241,22 +243,11 @@ export function CreateEventWizard() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="ev-date">Date</Label>
-                <Input
-                  id="ev-date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
+                <DatePicker id="ev-date" value={date} onChange={setDate} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="ev-time">Start time</Label>
-                <Input
-                  id="ev-time"
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                />
+                <TimePicker id="ev-time" value={time} onChange={setTime} />
               </div>
             </div>
             <div className="space-y-1.5">

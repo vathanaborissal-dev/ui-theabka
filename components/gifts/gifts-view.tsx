@@ -108,7 +108,7 @@ export function GiftsView({ eventId }: { eventId: string }) {
                     </span>
                     <span className="h-6 flex-1 overflow-hidden rounded-sm bg-muted">
                       <span
-                        className="block h-full rounded-sm bg-gold/70"
+                        className="block h-full rounded-r-[4px] bg-gold/70"
                         style={{ width: `${(tier.count / peak) * 100}%` }}
                       />
                     </span>
@@ -134,9 +134,9 @@ export function GiftsView({ eventId }: { eventId: string }) {
                           {formatMoney(amount, event.currency, locale)}
                         </dd>
                       </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div className="h-1.5 overflow-hidden rounded-sm bg-muted">
                         <div
-                          className="h-full rounded-full bg-gold"
+                          className="h-full rounded-r-[4px] bg-gold"
                           style={{ width: `${(amount / (stats.total || 1)) * 100}%` }}
                         />
                       </div>

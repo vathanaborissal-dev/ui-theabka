@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   Check,
+  Download,
   Plus,
   Search,
   SlidersHorizontal,
@@ -27,6 +28,7 @@ import { SegmentedBar } from "@/components/shared/segmented-bar"
 import { useData, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatNumber } from "@/lib/format"
+import { downloadCsv, toCsv } from "@/lib/csv"
 import { guestStats } from "@/lib/stats"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -137,16 +139,57 @@ export function GuestsView({
     { key: "pending", label: t("status.pending"), value: stats.pending, className: "bg-muted-foreground/15" },
   ]
 
+  /** Exports the filtered list, so the file matches what is on screen. */
+  function exportVisible() {
+    if (!event) return
+    const csv = toCsv(
+      [
+        t("guests.field.name"),
+        t("guests.field.nameKm"),
+        t("guests.field.family"),
+        t("side.label"),
+        t("guests.field.relationship"),
+        t("guests.field.partySize"),
+        t("guests.field.rsvp"),
+        t("guests.field.table"),
+        t("guests.field.phone"),
+        t("guests.field.gift"),
+        t("guests.field.notes"),
+      ],
+      filtered.map((guest) => [
+        guest.name,
+        guest.nameKm,
+        guest.family,
+        guest.side === "shared" ? t("side.shared") : L(event.sides[guest.side]),
+        guest.relationship,
+        guest.partySize,
+        t(`status.${guest.rsvp}`),
+        guest.table,
+        guest.phone,
+        guest.gift?.amount,
+        guest.notes,
+      ])
+    )
+    downloadCsv(`${event.slug}-guests.csv`, csv)
+    toast.success(`${formatNumber(filtered.length, locale)} ${t("guests.parties").toLowerCase()}`)
+  }
+
   return (
     <div className="space-y-5">
       <PageHeader
         title={t("guests.title")}
         description={t("guests.subtitle")}
         actions={
-          <Button onClick={() => openEdit(undefined)}>
-            <Plus />
-            {t("action.addGuest")}
-          </Button>
+          <>
+            <Button variant="outline" onClick={exportVisible} disabled={filtered.length === 0}>
+              <Download />
+              {t("action.export")}
+            </Button>
+            <Button onClick={() => openEdit(undefined)}>
+              <Plus />
+              {t("action.addGuest")}
+            </Button>
+          </>
         }
       />
 

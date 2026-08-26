@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
   DialogContent,
@@ -174,11 +175,10 @@ export function ExpenseDialog({
                 />
               </Field>
               <Field label={t("expenses.dueDate")} htmlFor="ex-due" optional>
-                <Input
+                <DatePicker
                   id="ex-due"
-                  type="date"
                   value={form.dueDate}
-                  onChange={(e) => set("dueDate", e.target.value)}
+                  onChange={(value) => set("dueDate", value)}
                 />
               </Field>
             </div>

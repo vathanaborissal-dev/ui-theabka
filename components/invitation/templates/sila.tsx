@@ -61,7 +61,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
       </header>
 
       {design.showSchedule && event.schedule.length > 0 ? (
-        <InvSection
+        <InvSection align="left"
           title={t("public.scheduleTitle")}
           ornament="rule"
           className="border-t border-(--inv-border)"
@@ -70,16 +70,16 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
       ) : null}
 
-      <InvSection
+      <InvSection align="left"
         title={t("public.venueTitle")}
         ornament="rule"
         className="border-t border-(--inv-border)"
       >
-        <InvitationVenue venue={event.venue} showMap={design.showMap} />
+        <InvitationVenue variant="left" venue={event.venue} showMap={design.showMap} />
       </InvSection>
 
       {design.showGiftInfo && design.giftNote ? (
-        <InvSection
+        <InvSection align="left"
           title={t("public.giftTitle")}
           ornament="rule"
           className="border-t border-(--inv-border)"
@@ -89,7 +89,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
       ) : null}
 
       {design.showRsvp ? (
-        <InvSection
+        <InvSection align="left"
           id="rsvp"
           title={t("public.rsvpTitle")}
           ornament="rule"
@@ -100,7 +100,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
       ) : null}
 
       {event.contacts.length > 0 ? (
-        <InvSection
+        <InvSection align="left"
           title={t("public.contactHosts")}
           ornament="rule"
           className="border-t border-(--inv-border)"

@@ -107,7 +107,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
             {L(design.message)}
           </p>
           <div className="mt-10">
-            <InvitationCountdown date={event.date} />
+            <InvitationCountdown variant="inline" date={event.date} />
           </div>
           <p className="mt-8 text-center">
             <AddToCalendar event={event} />
@@ -120,7 +120,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
             ornament={orn.sectionOrnament}
             className="bg-(--inv-surface)/75"
           >
-            <InvitationSchedule items={event.schedule} />
+            <InvitationSchedule items={event.schedule} variant="centred" />
           </InvSection>
         ) : null}
 
@@ -135,7 +135,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
           ornament={orn.sectionOrnament}
           className="bg-(--inv-surface)/75"
         >
-          <InvitationVenue venue={event.venue} showMap={design.showMap} />
+          <InvitationVenue variant="centred" venue={event.venue} showMap={design.showMap} />
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (

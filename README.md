@@ -3,7 +3,7 @@
 Frontend for an event platform built around how Cambodian weddings actually run:
 a printed invitation carries a QR code, guests scan it to open a bilingual
 digital invitation and reply, and the family tracks guests, cash gifts
-(*ចំណងដៃ*) and expenses from there.
+(_ចំណងដៃ_) and expenses from there.
 
 Frontend only — all data is mock data held in a client-side store.
 
@@ -15,10 +15,10 @@ npm run dev
 
 The product is deliberately split in two, and they look nothing alike:
 
-| | Route | Who it's for |
-|---|---|---|
-| **Dashboard** | `/events/[eventId]/…` | The couple and family running the event |
-| **Invitation** | `/i/[slug]` | Guests, usually on a phone, usually via QR |
+|                | Route                 | Who it's for                               |
+| -------------- | --------------------- | ------------------------------------------ |
+| **Dashboard**  | `/events/[eventId]/…` | The couple and family running the event    |
+| **Invitation** | `/i/[slug]`           | Guests, usually on a phone, usually via QR |
 
 The invitation has its own typography, palette and layout system, its own
 `LocaleProvider` (defaulting to Khmer), and shares nothing with the dashboard
@@ -73,11 +73,9 @@ icon rail with no way to know what an icon means is a worse sidebar, not a
 smaller one. `⌘B` / `Ctrl+B` toggles it from the keyboard, matching the
 convention most editors use.
 
-
-
 **Event-type agnostic model.** Weddings are the flagship, but `Event`, `Guest`,
 `Gift` and `Expense` carry nothing wedding-specific. Guests belong to side `a`,
-`b` or `shared`, and the *labels* for those sides live on the event — "Groom's
+`b` or `shared`, and the _labels_ for those sides live on the event — "Groom's
 side / Bride's side" for a wedding, "Family / Community" for a funeral. Adding
 an event type is configuration, not new types.
 
@@ -94,17 +92,17 @@ levels × nine photo frames × four gallery layouts × five entrance animations,
 all driven by `--inv-*` custom properties. Templates read only those
 variables, so changing a palette or typeface never touches a template.
 
-| Template | Character |
-|---|---|
-| **Baisei** (បាយសី) | Gold arch, baisei offering cone, white blooms, the couple in traditional dress |
-| **Angkor** (អង្គរ) | Temple silhouette, flame-tipped pediment over the names, carved kbach borders |
-| **Reachny** (រាជនី) | Formal engraved card — indigo and gold rules, cartouche, ruled honour line |
-| **Bopha** (បុប្ផា) | Classic Khmer card — gold frame, stacked family names |
-| **Phka Romduol** (ផ្កា​រំដួល) | Garlands and blooms of Cambodia's national flower |
-| **Naga** (នាគ) | Dark and ceremonial, naga balustrade over a full-bleed cover |
-| **Chan** (ចន្ទ) | Modern editorial, large serif, generous whitespace |
-| **Kravan** (ក្រវាន់) | Photo-first, details laid over the cover |
-| **Sila** (សីល) | Restrained — memorials get a layout that isn't celebratory |
+| Template                      | Character                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| **Baisei** (បាយសី)            | Gold arch, baisei offering cone, white blooms, the couple in traditional dress |
+| **Angkor** (អង្គរ)            | Temple silhouette, flame-tipped pediment over the names, carved kbach borders  |
+| **Reachny** (រាជនី)           | Formal engraved card — indigo and gold rules, cartouche, ruled honour line     |
+| **Bopha** (បុប្ផា)            | Classic Khmer card — gold frame, stacked family names                          |
+| **Phka Romduol** (ផ្កា​រំដួល) | Garlands and blooms of Cambodia's national flower                              |
+| **Naga** (នាគ)                | Dark and ceremonial, naga balustrade over a full-bleed cover                   |
+| **Chan** (ចន្ទ)               | Modern editorial, large serif, generous whitespace                             |
+| **Kravan** (ក្រវាន់)          | Photo-first, details laid over the cover                                       |
+| **Sila** (សីល)                | Restrained — memorials get a layout that isn't celebratory                     |
 
 **The figurative motifs are drawn too.** `khmer-motifs.tsx` holds the baisei
 (បាយសី) offering cone as tiers of folded banana leaves in a footed pahn, the
@@ -126,7 +124,7 @@ temple) as inline SVG `<pattern>` rather than data-URIs, so they can inherit a
 palette token. Pattern opacity is tied to the ornament level: a motif that
 competes with the couple's names has stopped being a background.
 
-**It behaves like an *e*-invitation, not a photo of one.** A sealed envelope
+**It behaves like an _e_-invitation, not a photo of one.** A sealed envelope
 with a wax seal that the guest taps to open, sections that rise into view as
 they scroll, a slow Ken Burns drift on the cover, romduol petals falling over
 the card, a swipeable gallery with a lightbox. All of it is off by default for

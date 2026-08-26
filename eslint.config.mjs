@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored tooling, not application source: the bundled skill scripts are
+    // CommonJS and are not ours to restyle.
+    ".claude/**",
   ]),
 ]);
 

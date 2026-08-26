@@ -39,7 +39,7 @@ export function BilingualField({
         <div
           className="inline-flex items-center rounded-full bg-muted p-0.5"
           role="group"
-          aria-label={`${label} — language`}
+          aria-label={`${label}: language`}
         >
           {(["en", "km"] as const).map((code) => (
             <button

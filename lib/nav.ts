@@ -1,4 +1,5 @@
 import {
+  BadgeCheck,
   Coins,
   LayoutDashboard,
   ListChecks,
@@ -36,6 +37,7 @@ export const eventNav: NavGroup[] = [
     labelKey: "nav.manage",
     items: [
       { segment: "guests", labelKey: "nav.guests", icon: Users, primary: true },
+      { segment: "check-in", labelKey: "nav.checkIn", icon: BadgeCheck },
       { segment: "planner", labelKey: "nav.planner", icon: ListChecks },
     ],
   },

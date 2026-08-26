@@ -210,6 +210,14 @@ export function EnvelopeIntro({
           <p className="mt-4 animate-pulse text-sm font-medium text-(--inv-accent)">
             {t("public.tapToOpen")}
           </p>
+          {/* An intro nobody can dismiss is an intro that annoys. */}
+          <button
+            type="button"
+            onClick={open}
+            className="mt-3 inline-flex h-11 items-center justify-center rounded-full px-5 text-sm text-(--inv-muted) underline underline-offset-4 transition-colors outline-none hover:text-(--inv-fg) focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
+          >
+            {t("public.skipIntro")}
+          </button>
         </div>
       </div>
     </div>

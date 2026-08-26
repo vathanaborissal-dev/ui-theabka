@@ -128,6 +128,8 @@ export type InvitationDesign = {
   dividerMotifId?: string
   /** Id from MOTIF_ASSETS for the crest above and below the card. */
   crestMotifId?: string
+  /** Id from MOTIF_ASSETS for the four card corners; falls back to drawn kbach. */
+  cornerMotifId?: string
   greeting: LocalizedText
   message: LocalizedText
   coverPhoto?: string

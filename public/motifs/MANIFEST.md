@@ -47,7 +47,7 @@ are a feature, not waste** — I will let couples pick which one appears.
 Display size ≈ 260px tall → **PNG at 800px tall**. Transparent background.
 Full body, feet included, roughly centred.
 
-### 2. `frames/` — kbach borders
+### 2. `frames/` — kbach borders and corners
 
 Dense filigree is slow to draw by hand and this is where the formal cards get
 their authority.
@@ -59,6 +59,15 @@ their authority.
 - `photo-frame--gold.svg` — ornate surround with a transparent hollow centre
 
 Display ≈ 120px corner / full-page border → **PNG at 400px / 2400px tall**.
+
+### 2a. `crests/` — standalone top and bottom ornaments
+
+Only place ornaments here when they are intended to sit above or below the
+invitation content as a crest. Corners and complete borders belong in
+`frames/`, so they do not appear in the crest picker.
+
+- `crest--top.svg` — centred ornament for the top of a card
+- `crest--bottom.svg` — centred ornament for the bottom of a card
 
 ### 3. `offerings/` — ceremonial objects
 

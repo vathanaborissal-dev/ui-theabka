@@ -41,7 +41,7 @@ export function InvitationVenue({
         href={venue.mapUrl}
         target="_blank"
         rel="noreferrer"
-        className="mt-5 inline-flex items-center gap-2 rounded-full border border-(--inv-accent) px-5 py-2.5 text-sm font-medium text-(--inv-accent) transition-colors outline-none hover:bg-(--inv-accent) hover:text-(--inv-accent-contrast) focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
+        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-(--inv-accent) px-5 py-3 text-sm font-medium text-(--inv-accent) transition-colors outline-none hover:bg-(--inv-accent) hover:text-(--inv-accent-contrast) focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
       >
         <Navigation className="size-4" aria-hidden="true" />
         {t("public.getDirections")}

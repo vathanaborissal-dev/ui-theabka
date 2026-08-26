@@ -26,7 +26,7 @@ export function TemplatePicker({
   const templates = templatesFor(eventType)
 
   return (
-    <ul className="grid grid-cols-2 gap-3">
+    <ul className="grid gap-2.5">
       {templates.map((template) => {
         const selected = template.id === value
         return (
@@ -36,33 +36,33 @@ export function TemplatePicker({
               onClick={() => onChange(template.id)}
               aria-pressed={selected}
               className={cn(
-                "group w-full overflow-hidden rounded-[var(--card-radius)] border text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                "group relative grid w-full grid-cols-[5.75rem_minmax(0,1fr)] overflow-hidden rounded-[var(--card-radius)] border text-left transition-[border-color,background-color,transform] outline-none active:scale-[0.99] focus-visible:ring-3 focus-visible:ring-ring/50",
                 selected
-                  ? "border-primary ring-1 ring-primary"
-                  : "border-border hover:border-foreground/25"
+                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                  : "border-border hover:border-foreground/30 hover:bg-muted/35"
               )}
             >
-              <span className="relative block">
+              <span className="relative block self-stretch overflow-hidden border-r border-border/70">
                 <TemplateThumb template={template} />
-                {selected ? (
-                  <span className="absolute top-2 right-2 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Check className="size-3" aria-hidden="true" />
-                  </span>
-                ) : null}
               </span>
-              <span className="block p-2.5">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-sm font-medium">{template.name[locale]}</span>
+              <span className="block min-w-0 p-3 pr-9">
+                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="text-sm font-semibold">{template.name[locale]}</span>
                   {template.tag ? (
-                    <span className="rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground">
+                    <span className="text-[0.625rem] font-medium text-primary">
                       {template.tag[locale]}
                     </span>
                   ) : null}
                 </span>
-                <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+                <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
                   {template.description[locale]}
                 </span>
               </span>
+              {selected ? (
+                <span className="absolute top-3 right-3 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Check className="size-3" aria-hidden="true" />
+                </span>
+              ) : null}
             </button>
           </li>
         )
@@ -74,6 +74,30 @@ export function TemplatePicker({
 /** Abstract miniature — conveys layout, not content. */
 function TemplateThumb({ template }: { template: InvitationTemplate }) {
   const base = "block aspect-4/5 w-full p-3"
+
+  // The bordered card's whole identity is the band, so the miniature shows the
+  // real artwork rather than an abstraction of it.
+  if (template.preview === "bordered") {
+    return (
+      <span
+        className={cn(base, "flex items-center justify-center bg-[oklch(0.977_0.012_60)]")}
+        style={{
+          borderStyle: "solid",
+          borderWidth: "10px",
+          borderImageSource: "url(/motifs/frames/border--kbach-red-gold.png)",
+          borderImageSlice: "92",
+          borderImageRepeat: "round",
+          padding: 0,
+        }}
+      >
+        <span className="flex flex-col items-center gap-1.5">
+          <span className="h-2 w-12 rounded-sm bg-[oklch(0.42_0.13_22)]" />
+          <span className="h-2 w-10 rounded-sm bg-[oklch(0.42_0.13_22)]" />
+          <span className="mt-1 h-px w-8 bg-[oklch(0.68_0.1_76)]" />
+        </span>
+      </span>
+    )
+  }
 
   if (template.preview === "ornate") {
     return (
@@ -180,11 +204,15 @@ function TemplateThumb({ template }: { template: InvitationTemplate }) {
 
   if (template.preview === "night") {
     return (
-      <span className={cn(base, "relative overflow-hidden bg-[oklch(0.185_0.025_55)] p-0")}>
-        <span className="relative flex h-full w-full flex-col justify-end bg-linear-to-t from-[oklch(0.185_0.025_55)] via-[oklch(0.3_0.035_58)] to-[oklch(0.45_0.04_60)] p-3">
-          <span className="mb-1.5 h-px w-full bg-[oklch(0.84_0.1_84)]/70" />
-          <span className="h-2.5 w-4/5 rounded-sm bg-[oklch(0.955_0.014_78)]/90" />
-          <span className="mt-1.5 h-1 w-1/2 rounded-full bg-[oklch(0.84_0.1_84)]/60" />
+      <span className={cn(base, "relative overflow-hidden bg-[oklch(0.185_0.025_55)] p-2")}>
+        <span className="grid h-full grid-cols-[0.9fr_1fr] items-center gap-2">
+          <span className="h-[82%] rounded-t-full border border-[oklch(0.84_0.1_84)]/70 bg-linear-to-b from-[oklch(0.47_0.04_60)] to-[oklch(0.23_0.03_55)]" />
+          <span className="flex flex-col gap-1.5">
+            <span className="h-1 w-8 rounded-full bg-[oklch(0.84_0.1_84)]/55" />
+            <span className="h-2 w-full rounded-sm bg-[oklch(0.955_0.014_78)]/90" />
+            <span className="h-2 w-4/5 rounded-sm bg-[oklch(0.955_0.014_78)]/90" />
+            <span className="mt-1 h-px w-full bg-[oklch(0.84_0.1_84)]/55" />
+          </span>
         </span>
       </span>
     )
@@ -352,8 +380,8 @@ export function PatternPicker({
             >
               <span className="relative block h-12 bg-muted/40 text-primary">
                 {pattern.id === "none" ? (
-                  <span className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                    —
+                  <span className="flex h-full items-center justify-center">
+                    <span className="size-4 rounded-full border border-muted-foreground/35" />
                   </span>
                 ) : (
                   <PatternBackground pattern={pattern.id} scale={0.55} className="opacity-70" />
@@ -600,7 +628,7 @@ export function MotifSlotPicker({
                 {item.id ? (
                   <Motif assetId={item.id} fallback={null} />
                 ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
+                  <span className="h-px w-8 bg-muted-foreground/35" />
                 )}
               </span>
               <span className="mt-1 block truncate text-center text-[0.6875rem] text-muted-foreground">

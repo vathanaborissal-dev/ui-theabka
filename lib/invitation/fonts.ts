@@ -33,8 +33,8 @@ export const FONT_PAIRINGS: FontPairing[] = [
     id: "classic",
     name: { en: "Classic serif", km: "សេរីហ្វបុរាណ" },
     description: {
-      en: "Cormorant with a Khmer serif — formal and quiet.",
-      km: "អក្សរសេរីហ្វ — ផ្លូវការ និងស្ងប់ស្ងាត់។",
+      en: "Cormorant with a Khmer serif. Formal and quiet.",
+      km: "អក្សរសេរីហ្វ បែបផ្លូវការ និងស្ងប់ស្ងាត់។",
     },
     display: "var(--font-latin-serif)",
     displayKhmer: "var(--font-khmer-serif-stack)",

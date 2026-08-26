@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { DesignProvider } from "./design-context"
 import { AmbientLayer } from "./ambient"
 import { EnvelopeIntro } from "./envelope-intro"
+import { GuestActionBar } from "./guest-action-bar"
 import { BaiseiTemplate } from "./templates/baisei"
 import { SbaiTemplate } from "./templates/sbai"
 import { ReachnyTemplate } from "./templates/reachny"
@@ -18,6 +19,7 @@ import { NagaTemplate } from "./templates/naga"
 import { ChanTemplate } from "./templates/chan"
 import { KravanTemplate } from "./templates/kravan"
 import { SilaTemplate } from "./templates/sila"
+import { KbachTemplate } from "./templates/kbach"
 import type { TemplateProps } from "./templates/types"
 
 const registry = {
@@ -31,6 +33,7 @@ const registry = {
   chan: ChanTemplate,
   kravan: KravanTemplate,
   sila: SilaTemplate,
+  kbach: KbachTemplate,
 } as const
 
 /**
@@ -44,7 +47,13 @@ export function InvitationRenderer({
   preview,
   replayKey,
   motionEnabled = false,
-}: TemplateProps & { replayKey?: number; motionEnabled?: boolean }) {
+  guestActions = false,
+}: TemplateProps & {
+  replayKey?: number
+  motionEnabled?: boolean
+  /** The public page's sticky reply bar. Off inside the builder preview. */
+  guestActions?: boolean
+}) {
   const { locale } = useLocale()
   const template = getTemplate(event.design.templateId)
   const palette = getPalette(event.design.paletteId)
@@ -78,6 +87,13 @@ export function InvitationRenderer({
           enabled={motionEnabled && Boolean(design.envelopeIntro)}
           replayKey={replayKey}
         />
+        {/* Inside the palette scope, so it wears the card's own colours. */}
+        {guestActions ? (
+          <GuestActionBar
+            enabled={Boolean(design.showRsvp)}
+            shareTitle={event.title.km || event.title.en}
+          />
+        ) : null}
       </DesignProvider>
     </div>
   )

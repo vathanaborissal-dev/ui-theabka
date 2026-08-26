@@ -17,7 +17,7 @@
       "author": "Unknown",
       "purchasedOn": "",
       "status": "Checkerboard stripped and split into top and bottom crest. IN USE.",
-      "derivedFile": "frames/crest--top.png + crest--bottom.png"
+      "derivedFile": "crests/crest--top.png + crest--bottom.png"
     },
     {
       "file": "dividers/gold-floral-border.png",
@@ -78,7 +78,47 @@
       "author": "Victor Graphic",
       "purchasedOn": "",
       "status": "Reference only — moved out of public/ to motif-source-originals/."
+    },
+    {
+      "file": "frames/border--kbach-red-gold.png",
+      "source": "https://www.behance.net/gallery/148539103/Kbach-Khmer-Frame",
+      "license": "To be reviewed by project owner",
+      "author": "Seng Vutha",
+      "purchasedOn": "",
+      "status": "Downloaded source sheet, isolated the outer frame, removed the background and cropped. Registered for template use."
+    },
+    {
+      "file": "frames/corner--kbach-gold.png",
+      "source": "https://5khmer.blogspot.com/2011/08/kbach-khmer-angkor-in-vector-ai.html",
+      "license": "To be reviewed by project owner",
+      "author": "Victor Graphic",
+      "purchasedOn": "",
+      "status": "Extracted from the downloaded motif sheet, reoriented as a top-left corner, made transparent and tightly cropped. Registered for template use."
+    },
+    {
+      "file": "dividers/divider--kbach-medallion.png",
+      "source": "https://5khmer.blogspot.com/2011/08/kbach-khmer-angkor-in-vector-ai.html",
+      "license": "To be reviewed by project owner",
+      "author": "Victor Graphic",
+      "purchasedOn": "",
+      "status": "Extracted from the downloaded motif sheet, made transparent and tightly cropped. Registered for template use."
+    },
+    {
+      "file": "dividers/divider--kbach-temple.png",
+      "source": "https://www.behance.net/gallery/156143907/Kbach-Khmer-Angkor",
+      "license": "To be reviewed by project owner",
+      "author": "Seng Vutha",
+      "purchasedOn": "",
+      "status": "Extracted from the downloaded motif sheet, made transparent and tightly cropped. Registered for template use."
+    },
+    {
+      "file": "seals/seal--kbach-diamond.png",
+      "source": "https://www.behance.net/gallery/156143907/Kbach-Khmer-Angkor",
+      "license": "To be reviewed by project owner",
+      "author": "Seng Vutha",
+      "purchasedOn": "",
+      "status": "Extracted from the downloaded motif sheet, made transparent and tightly cropped. Registered for template use."
     }
   ],
-  "$status": "Processed 2026-08-26: source PNGs had the transparency checkerboard flattened into the pixels; it was removed programmatically and the results trimmed/split. Untouched originals are in motif-source-originals/ at the project root."
+  "$status": "Processed 2026-08-26: source sheets were downloaded, useful motifs were isolated, their backgrounds were removed, and the resulting PNGs were tightly cropped. Existing untouched originals remain in motif-source-originals/; the new source sheets are in public/motifs/_originals/downloaded/."
 }

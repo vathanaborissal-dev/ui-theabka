@@ -10,6 +10,7 @@ import {
   PedimentArch,
 } from "@/components/invitation/khmer-ornaments"
 import { PatternBackground } from "@/components/invitation/patterns"
+import { MotifCorners } from "@/components/invitation/motif"
 import { InvitationCountdown } from "../sections/countdown"
 import { InvitationSchedule } from "../sections/schedule"
 import { InvitationVenue } from "../sections/venue"
@@ -40,7 +41,7 @@ export function AngkorTemplate({ event, guestName }: TemplateProps) {
   const [first, second] = event.hosts
 
   return (
-    <article className="relative bg-(--inv-bg) text-(--inv-fg)">
+    <article data-inv-template="angkor" className="relative bg-(--inv-bg) text-(--inv-fg)">
       {orn.pattern !== "none" ? (
         <PatternBackground
           pattern={orn.pattern}
@@ -54,12 +55,18 @@ export function AngkorTemplate({ event, guestName }: TemplateProps) {
         <header className="px-4 pt-14 pb-2 @xl:px-8 @xl:pt-20">
           <div className="relative mx-auto max-w-2xl border-2 border-(--inv-gold)/35 bg-(--inv-bg)/85 px-5 py-10 @xl:px-10 @xl:py-14">
             {orn.showCorners ? (
-              <>
-                <KbachCornerRich className="absolute -top-2 -left-2 size-14 text-(--inv-gold) @xl:size-16" />
-                <KbachCornerRich className="absolute -top-2 -right-2 size-14 scale-x-[-1] text-(--inv-gold) @xl:size-16" />
-                <KbachCornerRich className="absolute -bottom-2 -left-2 size-14 scale-y-[-1] text-(--inv-gold) @xl:size-16" />
-                <KbachCornerRich className="absolute -right-2 -bottom-2 size-14 scale-[-1] text-(--inv-gold) @xl:size-16" />
-              </>
+              <MotifCorners
+                assetId={design.cornerMotifId}
+                className="size-16 @xl:size-24"
+                fallback={
+                  <>
+                    <KbachCornerRich className="absolute -top-2 -left-2 size-14 text-(--inv-gold) @xl:size-16" />
+                    <KbachCornerRich className="absolute -top-2 -right-2 size-14 scale-x-[-1] text-(--inv-gold) @xl:size-16" />
+                    <KbachCornerRich className="absolute -bottom-2 -left-2 size-14 scale-y-[-1] text-(--inv-gold) @xl:size-16" />
+                    <KbachCornerRich className="absolute -right-2 -bottom-2 size-14 scale-[-1] text-(--inv-gold) @xl:size-16" />
+                  </>
+                }
+              />
             ) : null}
 
             <AngkorSilhouette className="mx-auto h-16 w-auto text-(--inv-accent) @xl:h-20" />

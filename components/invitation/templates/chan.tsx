@@ -18,25 +18,29 @@ import {
 import type { TemplateProps } from "./types"
 
 /**
- * Chan — modern editorial.
+ * Chan — the editorial masthead.
  *
- * Left-aligned, asymmetric, and quiet. Where Bopha centres everything inside a
- * frame, Chan runs the names across a wide measure with hairline rules and lets
- * the whitespace carry the formality.
+ * Structurally unlike the other cards: instead of one column of stacked
+ * sections, a wide screen splits this into a fixed masthead and a scrolling
+ * column beside it. The names, the date and the reply button stay in view the
+ * whole way down, which is the point — the guest never loses the "what and
+ * when" while reading the detail. Below the split it collapses to a single
+ * column and the masthead becomes an ordinary hero.
  */
 export function ChanTemplate({ event, guestName }: TemplateProps) {
   const { t, L, locale } = useLocale()
   const design = event.design
 
   return (
-    <article className="bg-(--inv-bg) text-(--inv-fg)">
-      <header className="mx-auto max-w-4xl px-6 pt-20 pb-12 @xl:pt-28">
+    <article data-inv-template="chan" className="bg-(--inv-bg) text-(--inv-fg) @3xl:grid @3xl:grid-cols-[minmax(0,21rem)_minmax(0,1fr)]">
+      {/* Masthead — sticky beside the content once there is room for two columns. */}
+      <aside className="border-(--inv-border) px-7 pt-16 pb-10 @3xl:sticky @3xl:top-0 @3xl:flex @3xl:h-svh @3xl:flex-col @3xl:justify-center @3xl:border-r @3xl:py-14">
         <p className="text-[0.75rem] tracking-[0.3em] text-(--inv-muted) uppercase">
           {t(`event.type.${event.type}`)}
         </p>
 
         <h1
-          className="mt-8 text-[clamp(2.25rem,9cqi,4.5rem)] leading-[1.05] text-balance break-words text-(--inv-fg)"
+          className="mt-7 text-[clamp(2rem,8cqi,3rem)] leading-[1.08] text-balance break-words"
           style={{ fontFamily: "var(--inv-font-display)" }}
         >
           {event.hosts.map((host, i) => (
@@ -49,98 +53,113 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
           ))}
         </h1>
 
-        <div className="mt-10 grid gap-6 border-t border-(--inv-border) pt-6 @xl:grid-cols-3">
+        <dl className="mt-9 space-y-5 border-t border-(--inv-border) pt-6 text-sm">
           <div>
-            <p className="text-[0.6875rem] tracking-[0.18em] text-(--inv-muted) uppercase">
+            <dt className="text-[0.6875rem] tracking-[0.18em] text-(--inv-muted) uppercase">
               {t("public.saveTheDate")}
-            </p>
-            <p className="mt-1.5 text-(--inv-fg)">{formatDate(event.date, locale, "long")}</p>
-            <p className="text-sm text-(--inv-muted)">{formatTime(event.date, locale)}</p>
+            </dt>
+            <dd className="mt-1.5 text-(--inv-fg)">{formatDate(event.date, locale, "long")}</dd>
+            <dd className="text-(--inv-muted)">{formatTime(event.date, locale)}</dd>
           </div>
           <div>
-            <p className="text-[0.6875rem] tracking-[0.18em] text-(--inv-muted) uppercase">
+            <dt className="text-[0.6875rem] tracking-[0.18em] text-(--inv-muted) uppercase">
               {t("public.venueTitle")}
-            </p>
-            <p className="mt-1.5 text-(--inv-fg)">{L(event.venue.name)}</p>
-            <p className="text-sm text-(--inv-muted)">{L(event.venue.address)}</p>
+            </dt>
+            <dd className="mt-1.5 text-(--inv-fg)">{L(event.venue.name)}</dd>
+            <dd className="text-(--inv-muted)">{L(event.venue.address)}</dd>
           </div>
-          <div className="@xl:text-right">
-            <AddToCalendar event={event} />
-          </div>
+        </dl>
+
+        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2">
+          {design.showRsvp ? (
+            <a
+              href="#rsvp"
+              className="inline-flex min-h-11 items-center rounded-full bg-(--inv-accent) px-6 text-sm font-medium text-(--inv-accent-contrast) transition-opacity outline-none hover:opacity-90 focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
+            >
+              {t("public.replyNow")}
+            </a>
+          ) : null}
+          <AddToCalendar event={event} />
         </div>
-      </header>
+      </aside>
 
-      {design.coverPhoto || event.coverPhoto ? (
-        <FramedPhoto
-          src={design.coverPhoto ?? event.coverPhoto}
-          alt=""
-          seed={2}
-          frame={design.photoFrame ?? "none"}
-          motion={design.coverMotion ?? "none"}
-          aspect="aspect-3/2 @xl:aspect-[21/9]"
-        />
-      ) : null}
+      {/* The reading column. */}
+      <div className="min-w-0">
+        {design.coverPhoto || event.coverPhoto ? (
+          <FramedPhoto
+            src={design.coverPhoto ?? event.coverPhoto}
+            alt=""
+            seed={2}
+            frame={design.photoFrame ?? "none"}
+            motion={design.coverMotion ?? "none"}
+            aspect="aspect-3/2 @3xl:aspect-4/3"
+          />
+        ) : null}
 
-      <InvSection align="left">
-        <div className="mx-auto max-w-2xl">
+        <InvSection align="left">
           <p className="text-lg leading-relaxed text-(--inv-muted) @xl:text-xl">
             {L(design.greeting)}
           </p>
-          <p className="mt-4 text-base leading-loose text-(--inv-fg)">{L(design.message)}</p>
-        </div>
-        <div className="mt-12">
-          <InvitationCountdown variant="inline" date={event.date} />
-        </div>
-      </InvSection>
+          <p className="mt-4 max-w-prose text-base leading-loose text-(--inv-fg)">
+            {L(design.message)}
+          </p>
+          <div className="mt-11">
+            <InvitationCountdown variant="inline" date={event.date} />
+          </div>
+        </InvSection>
 
-      {design.showSchedule && event.schedule.length > 0 ? (
-        <InvSection align="left"
-          title={t("public.scheduleTitle")}
+        {design.showSchedule && event.schedule.length > 0 ? (
+          <InvSection
+            align="left"
+            title={t("public.scheduleTitle")}
+            ornament="rule"
+            className="border-y border-(--inv-border)"
+          >
+            <InvitationSchedule items={event.schedule} variant="plain" />
+          </InvSection>
+        ) : null}
+
+        {design.showGallery && design.gallery.length > 0 ? (
+          <InvSection align="left" title={t("inv.gallery")} ornament="rule">
+            <GalleryStrip photos={design.gallery} />
+          </InvSection>
+        ) : null}
+
+        <InvSection
+          align="left"
+          title={t("public.venueTitle")}
           ornament="rule"
-          className="border-y border-(--inv-border)"
+          className="border-t border-(--inv-border)"
         >
-          <InvitationSchedule items={event.schedule} variant="plain" />
+          <InvitationVenue variant="left" venue={event.venue} showMap={design.showMap} />
         </InvSection>
-      ) : null}
 
-      {design.showGallery && design.gallery.length > 0 ? (
-        <InvSection align="left" title={t("inv.gallery")} ornament="rule">
-          <GalleryStrip photos={design.gallery} />
-        </InvSection>
-      ) : null}
+        {design.showGiftInfo && design.giftNote ? (
+          <InvSection align="left" title={t("public.giftTitle")} ornament="rule">
+            <GiftNote note={design.giftNote} />
+          </InvSection>
+        ) : null}
 
-      <InvSection align="left"
-        title={t("public.venueTitle")}
-        ornament="rule"
-        className="border-t border-(--inv-border)"
-      >
-        <InvitationVenue variant="left" venue={event.venue} showMap={design.showMap} />
-      </InvSection>
+        {design.showRsvp ? (
+          <InvSection
+            align="left"
+            id="rsvp"
+            title={t("public.rsvpTitle")}
+            ornament="rule"
+            className="border-t border-(--inv-border) bg-(--inv-surface)"
+          >
+            <InvitationRsvpForm event={event} guestName={guestName} />
+          </InvSection>
+        ) : null}
 
-      {design.showGiftInfo && design.giftNote ? (
-        <InvSection align="left" title={t("public.giftTitle")} ornament="rule">
-          <GiftNote note={design.giftNote} />
-        </InvSection>
-      ) : null}
+        {event.contacts.length > 0 ? (
+          <InvSection align="left" title={t("public.contactHosts")} ornament="rule">
+            <ContactList contacts={event.contacts} />
+          </InvSection>
+        ) : null}
 
-      {design.showRsvp ? (
-        <InvSection align="left"
-          id="rsvp"
-          title={t("public.rsvpTitle")}
-          ornament="rule"
-          className="border-t border-(--inv-border) bg-(--inv-surface)"
-        >
-          <InvitationRsvpForm event={event} guestName={guestName} />
-        </InvSection>
-      ) : null}
-
-      {event.contacts.length > 0 ? (
-        <InvSection align="left" title={t("public.contactHosts")} ornament="rule">
-          <ContactList contacts={event.contacts} />
-        </InvSection>
-      ) : null}
-
-      <InvitationFooter event={event} />
+        <InvitationFooter event={event} />
+      </div>
     </article>
   )
 }

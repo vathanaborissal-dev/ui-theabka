@@ -13,6 +13,7 @@ import type { LocalizedText } from "@/lib/types"
 
 export type MotifCategory =
   | "couple"
+  | "crests"
   | "frames"
   | "dividers"
   | "offerings"
@@ -46,15 +47,27 @@ export const MOTIF_ASSETS: MotifAsset[] = [
   },
   {
     id: "crest-top",
-    category: "frames",
-    file: "motifs/frames/crest--top.png",
+    category: "crests",
+    file: "motifs/crests/crest--top.png",
     name: { en: "Gold crest", km: "កំពូលមាស" },
   },
   {
     id: "crest-bottom",
-    category: "frames",
-    file: "motifs/frames/crest--bottom.png",
+    category: "crests",
+    file: "motifs/crests/crest--bottom.png",
     name: { en: "Gold base crest", km: "ជើងមាស" },
+  },
+  {
+    id: "border-kbach-red-gold",
+    category: "frames",
+    file: "motifs/frames/border--kbach-red-gold.png",
+    name: { en: "Red-gold Khmer border", km: "ស៊ុមក្បាច់ខ្មែរក្រហមមាស" },
+  },
+  {
+    id: "corner-kbach-gold",
+    category: "frames",
+    file: "motifs/frames/corner--kbach-gold.png",
+    name: { en: "Gold Khmer corner", km: "ជ្រុងក្បាច់ខ្មែរមាស" },
   },
   {
     id: "divider-lotus",
@@ -81,11 +94,29 @@ export const MOTIF_ASSETS: MotifAsset[] = [
     name: { en: "Geometric band", km: "ក្រវាត់លំនាំ" },
   },
   {
+    id: "divider-kbach-medallion",
+    category: "dividers",
+    file: "motifs/dividers/divider--kbach-medallion.png",
+    name: { en: "Gold Kbach medallion", km: "បន្ទាត់ក្បាច់មេដាយមាស" },
+  },
+  {
+    id: "divider-kbach-temple",
+    category: "dividers",
+    file: "motifs/dividers/divider--kbach-temple.png",
+    name: { en: "Gold temple band", km: "ក្រវាត់ក្បាច់ប្រាសាទមាស" },
+  },
+  {
     id: "khmer-unalom",
     category: "seals",
     file: "motifs/seals/khmer-unalom.svg",
     name: { en: "Khmer unalom", km: "ឧណាលោមខ្មែរ" },
     tintable: true,
+  },
+  {
+    id: "seal-kbach-diamond",
+    category: "seals",
+    file: "motifs/seals/seal--kbach-diamond.png",
+    name: { en: "Gold Kbach diamond", km: "ត្រាក្បាច់ខ្មែររាងពេជ្រ" },
   },
 ]
 

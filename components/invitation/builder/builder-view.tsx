@@ -110,7 +110,7 @@ export function InvitationBuilder({ eventId }: { eventId: string }) {
           <Button
             onClick={() => {
               updateEvent(event.id, { status: "published" })
-              toast.success("Invitation published — your link is live")
+              toast.success("Invitation published. Your link is live")
             }}
             disabled={event.status === "published"}
           >
@@ -144,6 +144,12 @@ export function InvitationBuilder({ eventId }: { eventId: string }) {
                     fontPairingId: next.defaultFontPairingId,
                     patternId: next.defaultPattern,
                     ornamentLevel: next.defaultOrnamentLevel,
+                    photoFrame: next.defaultPhotoFrame,
+                    galleryLayout: next.defaultGalleryLayout,
+                    entrance: next.defaultEntrance,
+                    ambient: next.defaultAmbient,
+                    coverMotion: next.defaultCoverMotion,
+                    envelopeIntro: next.defaultEnvelopeIntro,
                   })
                 }}
               />
@@ -253,6 +259,12 @@ export function InvitationBuilder({ eventId }: { eventId: string }) {
                   fontPairingId: template.defaultFontPairingId,
                   patternId: template.defaultPattern,
                   ornamentLevel: template.defaultOrnamentLevel,
+                  photoFrame: template.defaultPhotoFrame,
+                  galleryLayout: template.defaultGalleryLayout,
+                  entrance: template.defaultEntrance,
+                  ambient: template.defaultAmbient,
+                  coverMotion: template.defaultCoverMotion,
+                  envelopeIntro: template.defaultEnvelopeIntro,
                 })
               }
             >
@@ -332,10 +344,19 @@ export function InvitationBuilder({ eventId }: { eventId: string }) {
 
             <Section title={t("inv.crest")}>
               <MotifSlotPicker
-                category="frames"
+                category="crests"
                 value={design.crestMotifId}
                 onChange={(crestMotifId) => set({ crestMotifId })}
                 drawnLabel={t("common.none")}
+              />
+            </Section>
+
+            <Section title={t("inv.corners")}>
+              <MotifSlotPicker
+                category="frames"
+                value={design.cornerMotifId}
+                onChange={(cornerMotifId) => set({ cornerMotifId })}
+                drawnLabel={t("inv.coupleDrawn")}
               />
             </Section>
 
@@ -647,7 +668,7 @@ function ScheduleEditor({
             <Button
               size="icon"
               variant="ghost"
-              aria-label={`${t("action.delete")} — ${item.title.en}`}
+              aria-label={`${t("action.delete")}: ${item.title.en}`}
               onClick={() => onChange(items.filter((i) => i.id !== item.id))}
             >
               <Trash2 />

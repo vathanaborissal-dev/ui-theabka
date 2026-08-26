@@ -4,6 +4,8 @@ import * as React from "react"
 import { Coins, Search, Wallet } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { PageHeader } from "@/components/shared/page-header"
+import { LoadMoreBar } from "@/components/shared/load-more"
+import { useLoadMore } from "@/components/shared/use-load-more"
 import { EmptyState } from "@/components/shared/empty-state"
 import { StatCard } from "@/components/shared/stat-card"
 import { Panel } from "@/components/shared/panel"
@@ -31,9 +33,8 @@ export function GiftsView({ eventId }: { eventId: string }) {
   const [giftGuest, setGiftGuest] = React.useState<Guest | undefined>()
   const [open, setOpen] = React.useState(false)
 
-  if (!event) return null
-
-  const stats = giftStats(guests)
+  // Computed above the early return: the pagination hook below cannot run
+  // conditionally.
   const withGift = guests
     .filter((g) => g.gift)
     .sort((a, b) => (b.gift?.amount ?? 0) - (a.gift?.amount ?? 0))
@@ -44,6 +45,12 @@ export function GiftsView({ eventId }: { eventId: string }) {
         (g) => g.name.toLowerCase().includes(q) || (g.family?.toLowerCase().includes(q) ?? false)
       )
     : withGift
+
+  const list = useLoadMore(rows, q)
+
+  if (!event) return null
+
+  const stats = giftStats(guests)
 
   const distribution = TIERS.map((tier, i) => {
     const min = i === 0 ? 0 : TIERS[i - 1].max
@@ -170,7 +177,7 @@ export function GiftsView({ eventId }: { eventId: string }) {
             </div>
 
             <ul className="divide-y divide-border/60">
-              {rows.map((guest) => (
+              {list.items.map((guest) => (
                 <li key={guest.id}>
                   <button
                     type="button"
@@ -202,6 +209,7 @@ export function GiftsView({ eventId }: { eventId: string }) {
                 </li>
               ))}
             </ul>
+            <LoadMoreBar state={list} />
           </div>
 
           {awaiting.length > 0 ? (

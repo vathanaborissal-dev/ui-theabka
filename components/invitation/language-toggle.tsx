@@ -21,7 +21,7 @@ export function InvitationLanguageToggle() {
           onClick={() => setLocale(code)}
           aria-pressed={locale === code}
           className={cn(
-            "rounded-full px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40",
+            "inline-flex h-10 min-w-[3rem] items-center justify-center rounded-full px-3.5 text-xs font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40",
             locale === code
               ? "bg-(--inv-accent) text-(--inv-accent-contrast)"
               : "text-(--inv-muted) hover:text-(--inv-fg)"

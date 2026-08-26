@@ -110,3 +110,45 @@ export function MotifRule({
     </span>
   )
 }
+
+/**
+ * The four corners of a card, from one top-left artwork.
+ *
+ * Supplied corner art is drawn once and mirrored — `scale-x-[-1]` for the top
+ * right, `scale-y-[-1]` bottom left, `scale-[-1]` bottom right — which is why
+ * the manifest only ever asked for one corner file. Falls back to whatever the
+ * template drew before, so `showCorners` behaves the same with no artwork.
+ */
+export function MotifCorners({
+  assetId,
+  fallback,
+  className = "size-16",
+}: {
+  assetId?: string
+  fallback: React.ReactNode
+  /** Sizing for each corner; the mirroring is applied on top. */
+  className?: string
+}) {
+  if (!findMotif(assetId)) return <>{fallback}</>
+
+  const corners = [
+    "top-0 left-0",
+    "top-0 right-0 scale-x-[-1]",
+    "bottom-0 left-0 scale-y-[-1]",
+    "right-0 bottom-0 scale-[-1]",
+  ]
+
+  return (
+    <>
+      {corners.map((position) => (
+        <span
+          key={position}
+          aria-hidden="true"
+          className={cn("pointer-events-none absolute", position, className)}
+        >
+          <Motif assetId={assetId} fallback={null} />
+        </span>
+      ))}
+    </>
+  )
+}

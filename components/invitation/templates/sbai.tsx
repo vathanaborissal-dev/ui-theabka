@@ -4,6 +4,7 @@ import { FramedPhoto } from "@/components/invitation/photo-frame"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatDate, formatTime } from "@/lib/format"
 import { FlowerGarland, KbachCornerRich, LotusFrieze, PedimentArch, Romduol } from "../khmer-ornaments"
+import { MotifCorners } from "@/components/invitation/motif"
 import { InvitationCountdown } from "../sections/countdown"
 import { GuestHonour } from "../sections/guest-honour"
 import { InvitationRsvpForm } from "../sections/rsvp-form"
@@ -33,7 +34,7 @@ export function SbaiTemplate({ event, guestName }: TemplateProps) {
   const orn = useOrnaments(design, "rich")
 
   return (
-    <article className="relative overflow-hidden bg-(--inv-accent) text-(--inv-fg)">
+    <article data-inv-template="sbai" className="relative overflow-hidden bg-(--inv-accent) text-(--inv-fg)">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-28 -right-20 size-72 rotate-[28deg] rounded-full border-[22px] border-(--inv-gold)/12" />
         <div className="absolute top-96 -left-24 size-64 -rotate-[24deg] rounded-full border-[18px] border-(--inv-gold)/12" />
@@ -44,12 +45,18 @@ export function SbaiTemplate({ event, guestName }: TemplateProps) {
         <div className="relative mx-auto max-w-2xl border border-(--inv-gold)/80 bg-(--inv-bg) p-1.5 shadow-[0_18px_50px_-24px_color-mix(in_oklch,var(--inv-fg)_65%,transparent)]">
           <div className="relative overflow-hidden border border-(--inv-gold)/50 px-5 py-11 @xl:px-12 @xl:py-16">
             {orn.showCorners ? (
-              <>
-                <KbachCornerRich className="absolute top-1 left-1 size-16 text-(--inv-gold)/75" />
-                <KbachCornerRich className="absolute top-1 right-1 size-16 scale-x-[-1] text-(--inv-gold)/75" />
-                <KbachCornerRich className="absolute bottom-1 left-1 size-16 scale-y-[-1] text-(--inv-gold)/75" />
-                <KbachCornerRich className="absolute right-1 bottom-1 size-16 scale-[-1] text-(--inv-gold)/75" />
-              </>
+              <MotifCorners
+                assetId={design.cornerMotifId}
+                className="size-16 @xl:size-24"
+                fallback={
+                  <>
+                    <KbachCornerRich className="absolute top-1 left-1 size-16 text-(--inv-gold)/75" />
+                    <KbachCornerRich className="absolute top-1 right-1 size-16 scale-x-[-1] text-(--inv-gold)/75" />
+                    <KbachCornerRich className="absolute bottom-1 left-1 size-16 scale-y-[-1] text-(--inv-gold)/75" />
+                    <KbachCornerRich className="absolute right-1 bottom-1 size-16 scale-[-1] text-(--inv-gold)/75" />
+                  </>
+                }
+              />
             ) : null}
 
             <PedimentArch className="mx-auto h-20 w-full max-w-sm text-(--inv-gold)" />

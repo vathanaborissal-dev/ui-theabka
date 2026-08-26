@@ -34,7 +34,12 @@ export function PublicInvitation({
     <LocaleProvider initialLocale="km" persist={false}>
       <div className="relative min-h-svh">
         <InvitationLanguageToggle />
-        <InvitationRenderer event={event} guestName={guest?.name} motionEnabled />
+        <InvitationRenderer
+          event={event}
+          guestName={guest?.name}
+          motionEnabled
+          guestActions
+        />
       </div>
     </LocaleProvider>
   )

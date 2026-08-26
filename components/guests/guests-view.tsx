@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/select"
 import { PageHeader } from "@/components/shared/page-header"
 import { EmptyState } from "@/components/shared/empty-state"
+import { Pagination } from "@/components/shared/pagination"
+import { usePagination } from "@/components/shared/use-pagination"
 import { SegmentedBar } from "@/components/shared/segmented-bar"
 import { useData, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
@@ -79,15 +81,22 @@ export function GuestsView({
   const [giftOpen, setGiftOpen] = React.useState(false)
   const [showFilters, setShowFilters] = React.useState(false)
 
+  // Paginate before grouping, so a page holds N guests rather than N groups.
+  // Above the early return: hooks cannot run conditionally.
+  const pager = usePagination(filtered)
+
   if (!event) return null
 
   const stats = guestStats(guests)
-  const visibleIds = filtered.map((g) => g.id)
+
+  // Select-all covers the rows actually on screen; quietly selecting a hundred
+  // off-page guests would make the bulk actions dangerous.
+  const visibleIds = pager.items.map((g) => g.id)
   const selectedVisible = visibleIds.filter((id) => selected.has(id))
   const allSelected = visibleIds.length > 0 && selectedVisible.length === visibleIds.length
   const someSelected = selectedVisible.length > 0
 
-  const groups = groupGuests(filtered, groupBy, {
+  const groups = groupGuests(pager.items, groupBy, {
     sides: { a: L(event.sides.a), b: L(event.sides.b), shared: t("side.shared") },
     rsvp: {
       confirmed: t("status.confirmed"),
@@ -371,6 +380,7 @@ export function GuestsView({
                 onRecordGift={openGift}
               />
             </div>
+            <Pagination state={pager} />
           </>
         )}
       </div>

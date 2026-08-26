@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, Copy, Download, Link2, Mail, QrCode as QrIcon, Send, Users } from "lucide-react"
+import { Check, Copy, Download, Link2, Mail, Send, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { QrCode, downloadQrSvg } from "./qr-code"
 import { formatDate, formatNumber, formatTime } from "@/lib/format"
+import { downloadCsv, toCsv } from "@/lib/csv"
 import { toast } from "sonner"
 
 export function ShareView({ eventId }: { eventId: string }) {
@@ -42,6 +43,21 @@ export function ShareView({ eventId }: { eventId: string }) {
     } catch {
       toast.error("Could not copy — please copy the link manually")
     }
+  }
+
+  function exportPersonalLinks() {
+    if (!event) return
+    const csv = toCsv(
+      [
+        t("guests.field.name"),
+        t("guests.field.nameKm"),
+        t("guests.field.phone"),
+        t("share.personalLinks"),
+      ],
+      guests.map((guest) => [guest.name, guest.nameKm, guest.phone, `${url}?g=${guest.id}`])
+    )
+    downloadCsv(`${event.slug}-invitation-links.csv`, csv)
+    toast.success(`${formatNumber(guests.length, locale)} ${t("guests.count").toLowerCase()}`)
   }
 
   const shareText = `${L(event.title)} — ${formatDate(event.date, locale, "long")}`
@@ -175,6 +191,15 @@ export function ShareView({ eventId }: { eventId: string }) {
                           {personal}
                         </span>
                       </span>
+                      <ButtonLink
+                        href={`https://t.me/share/url?url=${encodeURIComponent(personal)}&text=${encodeURIComponent(shareText)}`}
+                        target="_blank"
+                        size="icon-sm"
+                        variant="ghost"
+                        aria-label={`${t("share.telegram")} — ${guest.name}`}
+                      >
+                        <Send />
+                      </ButtonLink>
                       <Button
                         size="icon-sm"
                         variant="ghost"
@@ -194,8 +219,8 @@ export function ShareView({ eventId }: { eventId: string }) {
                 <ButtonLink href={`/events/${event.id}/guests`} variant="outline" size="sm">
                   {t("action.viewAll")}
                 </ButtonLink>
-                <Button variant="ghost" size="sm">
-                  <QrIcon />
+                <Button variant="ghost" size="sm" onClick={exportPersonalLinks}>
+                  <Download />
                   {t("action.export")} CSV
                 </Button>
               </div>

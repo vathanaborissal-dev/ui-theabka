@@ -32,10 +32,20 @@ export function InvSection({
   const motionEnabled = useInvitationMotionEnabled()
 
   return (
-    <section id={id} className={cn("px-6 py-12 @xl:py-16", className)}>
+    <section
+      id={id}
+      data-align={align}
+      data-ornament={ornament}
+      className={cn("inv-section px-6 py-12 @xl:py-16", className)}
+    >
       <Reveal entrance={motionEnabled ? entrance : "none"}>
       {title ? (
-        <header className={cn("mb-8", align === "left" ? "text-left" : "text-center")}>
+        <header
+          className={cn(
+            "inv-section-header mb-8",
+            align === "left" ? "text-left" : "text-center"
+          )}
+        >
           {ornament === "lotus" ? (
             <LotusMark className={cn("mb-3 size-5 text-(--inv-gold)", align === "center" && "mx-auto")} />
           ) : null}
@@ -43,8 +53,8 @@ export function InvSection({
             <Romduol className={cn("mb-3 size-7 text-(--inv-gold)", align === "center" && "mx-auto")} />
           ) : null}
           <h2
-            className="text-[0.8125rem] tracking-[0.22em] text-(--inv-accent) uppercase"
-            style={{ fontFamily: "var(--inv-font-body)" }}
+            className="inv-section-title text-(--inv-accent)"
+            style={{ fontFamily: "var(--inv-font-display)" }}
           >
             {title}
           </h2>
@@ -81,7 +91,7 @@ export function InvSection({
           ) : null}
         </header>
       ) : null}
-      {children}
+      <div className="inv-section-body">{children}</div>
       </Reveal>
     </section>
   )
@@ -129,7 +139,7 @@ export function ContactList({ contacts }: { contacts: ContactPerson[] }) {
                 href={`https://t.me/${contact.telegram}`}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`Telegram — ${L(contact.name)}`}
+                aria-label={`Telegram: ${L(contact.name)}`}
                 className="inline-flex size-8 items-center justify-center rounded-full border border-(--inv-border) text-(--inv-fg) transition-colors outline-none hover:border-(--inv-accent) hover:text-(--inv-accent) focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
               >
                 <Send className="size-3.5" aria-hidden="true" />
@@ -181,7 +191,7 @@ export function AddToCalendar({ event }: { event: EventRecord }) {
     <a
       href={`data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`}
       download={`${event.slug}.ics`}
-      className="inline-flex items-center gap-2 text-sm text-(--inv-accent) underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
+      className="inline-flex min-h-11 items-center gap-2 px-2 py-2.5 text-sm text-(--inv-accent) underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
     >
       {t("public.addToCalendar")}
     </a>

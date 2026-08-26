@@ -5,6 +5,7 @@ import { formatDate, formatTime } from "@/lib/format"
 import { FramedPhoto } from "@/components/invitation/photo-frame"
 import { KbachCornerRich, LotusFrieze } from "@/components/invitation/khmer-ornaments"
 import { Baisei, Cartouche } from "@/components/invitation/khmer-motifs"
+import { MotifCorners } from "@/components/invitation/motif"
 import { PatternBackground } from "@/components/invitation/patterns"
 import { InvitationCountdown } from "../sections/countdown"
 import { InvitationSchedule } from "../sections/schedule"
@@ -37,7 +38,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
   const [first, second] = event.hosts
 
   return (
-    <article className="relative bg-(--inv-bg) text-(--inv-fg)">
+    <article data-inv-template="reachny" className="relative bg-(--inv-bg) text-(--inv-fg)">
       {orn.pattern !== "none" ? (
         <PatternBackground
           pattern={orn.pattern}
@@ -53,12 +54,18 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
           <div className="relative mx-auto max-w-2xl border-[3px] border-(--inv-accent) p-1.5">
             <div className="relative border border-(--inv-gold)/70 px-5 py-10 @xl:px-10 @xl:py-14">
               {orn.showCorners ? (
-                <>
-                  <KbachCornerRich className="absolute top-1 left-1 size-16 text-(--inv-accent)/45" />
-                  <KbachCornerRich className="absolute top-1 right-1 size-16 scale-x-[-1] text-(--inv-accent)/45" />
-                  <KbachCornerRich className="absolute bottom-1 left-1 size-16 scale-y-[-1] text-(--inv-accent)/45" />
-                  <KbachCornerRich className="absolute right-1 bottom-1 size-16 scale-[-1] text-(--inv-accent)/45" />
-                </>
+                <MotifCorners
+                  assetId={design.cornerMotifId}
+                  className="size-14 @sm:size-20 @xl:size-24"
+                  fallback={
+                    <>
+                      <KbachCornerRich className="absolute top-1 left-1 size-16 text-(--inv-accent)/45" />
+                      <KbachCornerRich className="absolute top-1 right-1 size-16 scale-x-[-1] text-(--inv-accent)/45" />
+                      <KbachCornerRich className="absolute bottom-1 left-1 size-16 scale-y-[-1] text-(--inv-accent)/45" />
+                      <KbachCornerRich className="absolute right-1 bottom-1 size-16 scale-[-1] text-(--inv-accent)/45" />
+                    </>
+                  }
+                />
               ) : null}
 
               <Cartouche className="mx-auto h-32 w-28 text-(--inv-gold)">

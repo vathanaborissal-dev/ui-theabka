@@ -102,10 +102,10 @@ export function Landing() {
           <nav className="ml-auto flex items-center gap-2">
             <LanguageToggle />
             <ThemeMenu />
-            <ButtonLink href="/events" variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <ButtonLink href="/login" variant="ghost" size="sm" className="hidden sm:inline-flex">
               {locale === "km" ? "ចូលប្រើ" : "Sign in"}
             </ButtonLink>
-            <ButtonLink href="/events/new" size="sm">
+            <ButtonLink href="/signup" size="sm">
               {c.cta}
             </ButtonLink>
           </nav>

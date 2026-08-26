@@ -4,6 +4,8 @@ import * as React from "react"
 import { Plus, Receipt } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
+import { Pagination } from "@/components/shared/pagination"
+import { usePagination } from "@/components/shared/use-pagination"
 import { EmptyState } from "@/components/shared/empty-state"
 import { StatCard } from "@/components/shared/stat-card"
 import { BarList } from "@/components/charts/bar-list"
@@ -33,13 +35,15 @@ export function ExpensesView({
   const [editing, setEditing] = React.useState<Expense | undefined>()
   const [open, setOpen] = React.useState(openNew)
 
+  // Above the early return: the pagination hook cannot run conditionally.
+  const rows = [...expenses].sort((a, b) => b.amount - a.amount)
+  const pager = usePagination(rows)
+
   if (!event) return null
 
   const stats = expenseStats(expenses)
   const gifts = giftStats(guests)
   const coverage = stats.total ? Math.min((gifts.total / stats.total) * 100, 100) : 0
-
-  const rows = [...expenses].sort((a, b) => b.amount - a.amount)
 
   function openDialog(expense?: Expense) {
     setEditing(expense)
@@ -135,7 +139,7 @@ export function ExpensesView({
                 <h2 className="display text-base">{t("expenses.title")}</h2>
               </header>
               <ul className="divide-y divide-border/60">
-                {rows.map((expense) => {
+                {pager.items.map((expense) => {
                   const days = expense.dueDate ? daysUntil(expense.dueDate) : null
                   const dueSoon =
                     expense.status !== "paid" && days !== null && days <= 14
@@ -190,6 +194,7 @@ export function ExpensesView({
                   )
                 })}
               </ul>
+              <Pagination state={pager} />
             </div>
           </div>
         </>

@@ -34,7 +34,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
   const orn = useOrnaments(design, "rich")
 
   return (
-    <article className="relative bg-(--inv-bg) text-(--inv-fg)">
+    <article data-inv-template="romduol" className="relative bg-(--inv-bg) text-(--inv-fg)">
       {orn.pattern !== "none" ? (
         <PatternBackground pattern={orn.pattern} className="text-(--inv-accent)" scale={0.9}
           opacity={orn.patternOpacity} />

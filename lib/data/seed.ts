@@ -73,8 +73,8 @@ export const seedEvents: EventRecord[] = [
         km: "កោះពេជ្រ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
       },
       landmark: {
-        en: "Hall B, second floor — parking on the river side",
-        km: "សាល B ជាន់ទី២ — កន្លែងចតរថយន្តនៅខាងមាត់ទន្លេ",
+        en: "Hall B, second floor. Parking on the river side.",
+        km: "សាល B ជាន់ទី២។ កន្លែងចតរថយន្តនៅខាងមាត់ទន្លេ។",
       },
       mapUrl: "https://maps.google.com/?q=Diamond+Island+Convention+Centre+Phnom+Penh",
       lat: 11.5449,

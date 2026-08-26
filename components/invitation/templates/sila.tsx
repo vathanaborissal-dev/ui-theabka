@@ -27,7 +27,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
   const design = event.design
 
   return (
-    <article className="bg-(--inv-bg) text-(--inv-fg)">
+    <article data-inv-template="sila" className="bg-(--inv-bg) text-(--inv-fg)">
       <header className="mx-auto max-w-xl px-6 pt-24 pb-12 text-center @xl:pt-32">
         <LotusMark className="mx-auto size-8 text-(--inv-muted)" />
 
@@ -44,7 +44,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
 
         {event.hosts.length > 0 ? (
           <p className="mt-5 text-base text-(--inv-muted)">
-            {event.hosts.map((h) => L(h.name)).join(" · ")}
+            {event.hosts.map((h) => L(h.name)).join(" & ")}
           </p>
         ) : null}
 

@@ -41,7 +41,7 @@ export function BaiseiTemplate({ event, guestName }: TemplateProps) {
   const orn = useOrnaments(design, "rich")
 
   return (
-    <article className="relative bg-(--inv-bg) text-(--inv-fg)">
+    <article data-inv-template="baisei" className="relative bg-(--inv-bg) text-(--inv-fg)">
       {/* Soft wash behind the whole card, as on the printed originals */}
       <div
         aria-hidden="true"

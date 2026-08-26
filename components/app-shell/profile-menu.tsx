@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CalendarDays, ChevronsUpDown, Palette, Plus } from "lucide-react"
+import { CalendarDays, ChevronsUpDown, LogOut, Palette, Plus } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,6 +122,13 @@ export function ProfileMenu({ collapsed = false }: { collapsed?: boolean }) {
             <LanguageToggle />
           </div>
         </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem render={<Link href="/login" />}>
+          <LogOut className="size-4" />
+          {t("account.signOut")}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

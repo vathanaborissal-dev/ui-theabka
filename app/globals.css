@@ -488,6 +488,226 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Invitation template personalities.
+
+   The public templates share accessible content components, but their visual
+   grammar must not collapse into one generic card. These selectors give each
+   template its own heading scale, alignment, spacing rhythm and surface
+   treatment while leaving the event data and builder controls shared.
+   --------------------------------------------------------------------------- */
+@layer components {
+  .inv-section {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .inv-section-header {
+    margin-inline: auto;
+    max-width: 36rem;
+  }
+
+  .inv-section[data-align="left"] .inv-section-header {
+    margin-inline: 0;
+  }
+
+  .inv-section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  .inv-section-body {
+    position: relative;
+  }
+
+  /* Baisei: soft, romantic and illustrated. */
+  [data-inv-template="baisei"] .inv-section {
+    padding-block: clamp(3.5rem, 9cqi, 5.5rem);
+  }
+
+  [data-inv-template="baisei"] .inv-section-title {
+    font-size: clamp(1.35rem, 4.8cqi, 1.8rem);
+    font-weight: 500;
+    letter-spacing: 0.015em;
+  }
+
+  [data-inv-template="baisei"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 48rem;
+  }
+
+  /* Sbai: formal silk card with restrained engraved labels. */
+  [data-inv-template="sbai"] .inv-section-header {
+    max-width: 28rem;
+    border-block: 1px solid color-mix(in oklch, var(--inv-gold) 45%, transparent);
+    padding-block: 0.8rem;
+  }
+
+  [data-inv-template="sbai"] .inv-section-title {
+    font-family: var(--inv-font-body) !important;
+    font-size: 0.78rem;
+    font-weight: 650;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  [data-inv-template="sbai"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 46rem;
+  }
+
+  /* Reachny: printed invitation, left-ranged and typographic. */
+  [data-inv-template="reachny"] .inv-section {
+    padding-inline: clamp(1.5rem, 7cqi, 4.5rem);
+  }
+
+  [data-inv-template="reachny"] .inv-section-header {
+    max-width: none;
+    border-bottom: 2px solid color-mix(in oklch, var(--inv-accent) 70%, transparent);
+    padding-bottom: 0.9rem;
+  }
+
+  [data-inv-template="reachny"] .inv-section-title {
+    font-size: clamp(1.4rem, 5cqi, 1.9rem);
+    font-weight: 600;
+  }
+
+  /* Angkor: architectural blocks and temple-stone plaques. */
+  [data-inv-template="angkor"] .inv-section-header {
+    width: fit-content;
+    min-width: min(100%, 15rem);
+    border-inline: 1px solid color-mix(in oklch, var(--inv-gold) 55%, transparent);
+    background: color-mix(in oklch, var(--inv-surface) 86%, transparent);
+    padding: 0.65rem 1.5rem 0.8rem;
+  }
+
+  [data-inv-template="angkor"] .inv-section-title {
+    font-size: clamp(1.2rem, 4.5cqi, 1.55rem);
+    letter-spacing: 0.025em;
+  }
+
+  [data-inv-template="angkor"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 52rem;
+  }
+
+  /* Bopha: family-led, balanced and traditional. */
+  [data-inv-template="bopha"] .inv-section-title {
+    font-size: clamp(1.3rem, 4.8cqi, 1.7rem);
+    font-weight: 500;
+  }
+
+  [data-inv-template="bopha"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 44rem;
+  }
+
+  /* Romduol: organic, open and floral. */
+  [data-inv-template="romduol"] .inv-section {
+    overflow: hidden;
+    padding-block: clamp(3.75rem, 10cqi, 6rem);
+  }
+
+  [data-inv-template="romduol"] .inv-section-title {
+    font-size: clamp(1.55rem, 6cqi, 2.15rem);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  [data-inv-template="romduol"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 48rem;
+  }
+
+  /* Naga: cinematic night with broad, gold-led headings. */
+  [data-inv-template="naga"] .inv-section {
+    padding-inline: clamp(1.5rem, 7cqi, 4rem);
+  }
+
+  [data-inv-template="naga"] .inv-section-header {
+    max-width: 52rem;
+    border-top: 1px solid color-mix(in oklch, var(--inv-gold) 55%, transparent);
+    padding-top: 1.1rem;
+    text-align: left;
+  }
+
+  [data-inv-template="naga"] .inv-section-title {
+    color: var(--inv-gold);
+    font-size: clamp(1.55rem, 5.5cqi, 2.1rem);
+    font-weight: 500;
+  }
+
+  [data-inv-template="naga"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 52rem;
+  }
+
+  /* Chan: editorial reading column. */
+  [data-inv-template="chan"] .inv-section {
+    padding-inline: clamp(1.75rem, 8cqi, 5rem);
+    padding-block: clamp(3.5rem, 9cqi, 6rem);
+  }
+
+  [data-inv-template="chan"] .inv-section-header {
+    max-width: none;
+    border-bottom: 1px solid var(--inv-border);
+    padding-bottom: 1.25rem;
+  }
+
+  [data-inv-template="chan"] .inv-section-title {
+    font-size: clamp(1.8rem, 6cqi, 2.7rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+  }
+
+  /* Kravan: modern photo story, deliberately card-like. */
+  [data-inv-template="kravan"] .inv-section-header {
+    max-width: none;
+  }
+
+  [data-inv-template="kravan"] .inv-section-title {
+    font-size: clamp(1.45rem, 5cqi, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  /* Sila: quiet hierarchy and compact reading measure. */
+  [data-inv-template="sila"] .inv-section {
+    margin-inline: auto;
+    max-width: 48rem;
+    padding-block: 3.25rem;
+  }
+
+  [data-inv-template="sila"] .inv-section-header {
+    max-width: none;
+  }
+
+  [data-inv-template="sila"] .inv-section-title {
+    font-family: var(--inv-font-body) !important;
+    font-size: 0.82rem;
+    font-weight: 650;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  /* Kbach: dense carved border with compact ceremonial headings. */
+  [data-inv-template="kbach"] .inv-section {
+    padding-inline: clamp(1rem, 5cqi, 3rem);
+  }
+
+  [data-inv-template="kbach"] .inv-section-title {
+    font-size: clamp(1.25rem, 4.8cqi, 1.7rem);
+    font-weight: 600;
+  }
+
+  [data-inv-template="kbach"] .inv-section-body {
+    margin-inline: auto;
+    max-width: 46rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Invitation motion.
 
    Entrance states are driven by two classes: `inv-enter-idle` holds the element

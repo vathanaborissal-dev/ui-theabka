@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Field } from "@/components/shared/field"
+import { ReceiptUploadField } from "./receipt-upload-field"
 import { useData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { toast } from "sonner"
@@ -57,6 +59,7 @@ export function ExpenseDialog({
 
   const [form, setForm] = React.useState(() => toForm(expense))
   const [error, setError] = React.useState<string>()
+  const [receiptUploading, setReceiptUploading] = React.useState(false)
 
   // See GuestFormSheet: re-seed during render on open / expense change.
   const seed = `${expense?.id ?? "new"}:${open}`
@@ -65,6 +68,7 @@ export function ExpenseDialog({
     setPrevSeed(seed)
     setForm(toForm(expense))
     setError(undefined)
+    setReceiptUploading(false)
   }
 
   const set = <K extends keyof ReturnType<typeof toForm>>(
@@ -74,6 +78,7 @@ export function ExpenseDialog({
 
   function save(e: React.FormEvent) {
     e.preventDefault()
+    if (receiptUploading) return
     if (!form.title.trim()) {
       setError("Please describe the expense")
       return
@@ -91,21 +96,30 @@ export function ExpenseDialog({
       status: form.status,
       dueDate: form.dueDate || undefined,
       note: form.note.trim() || undefined,
+      receiptUrl: form.receiptUrl,
     }
 
-    if (editing && expense) {
-      updateExpense(expense.id, payload)
-      toast.success(`${payload.title} updated`)
-    } else {
-      addExpense({ ...payload, id: `ex_${Date.now()}`, eventId: event.id })
-      toast.success(`${payload.title} added`)
-    }
-    onOpenChange(false)
+    // The id is the server's to assign, and so are `status` and the
+    // outstanding balance, which it derives from the amounts.
+    void (async () => {
+      try {
+        if (editing && expense) {
+          await updateExpense(expense.id, payload)
+          toast.success(`${payload.title} updated`)
+        } else {
+          await addExpense(event.id, payload)
+          toast.success(`${payload.title} added`)
+        }
+        onOpenChange(false)
+      } catch {
+        toast.error("That could not be saved. Please try again.")
+      }
+    })()
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <form onSubmit={save}>
           <DialogHeader>
             <DialogTitle>{t(editing ? "action.edit" : "expenses.add")}</DialogTitle>
@@ -212,13 +226,23 @@ export function ExpenseDialog({
                 onChange={(e) => set("note", e.target.value)}
               />
             </Field>
+
+            <ReceiptUploadField
+              value={form.receiptUrl || undefined}
+              eventId={event.id}
+              onChange={(url) => set("receiptUrl", url ?? "")}
+              onUploadingChange={setReceiptUploading}
+            />
           </div>
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               {t("action.cancel")}
             </Button>
-            <Button type="submit">{t("action.save")}</Button>
+            <Button type="submit" disabled={receiptUploading}>
+              {receiptUploading ? <BrandSpinner /> : null}
+              {receiptUploading ? t("expenses.receiptUploading") : t("action.save")}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -236,5 +260,6 @@ function toForm(expense?: Expense) {
     status: expense?.status ?? ("planned" as ExpenseStatus),
     dueDate: expense?.dueDate ?? "",
     note: expense?.note ?? "",
+    receiptUrl: expense?.receiptUrl ?? "",
   }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { Photo } from "@/components/shared/photo"
 import { useLocale } from "@/components/providers/locale-provider"
@@ -220,9 +221,9 @@ function Lightbox({
 
   if (index === null) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
       role="dialog"
       aria-modal="true"
       aria-label={t("inv.gallery")}
@@ -232,17 +233,20 @@ function Lightbox({
         type="button"
         onClick={onClose}
         aria-label={t("action.close")}
-        className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/10 text-white outline-none hover:bg-white/20 focus-visible:ring-3 focus-visible:ring-white/50"
+        className="absolute top-4 right-4 z-10 flex size-10 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/20 outline-none hover:bg-black/75 focus-visible:ring-3 focus-visible:ring-white/50"
       >
         <X className="size-5" />
       </button>
 
-      <Photo
-        src={photos[index]}
-        alt={`Photograph ${index + 1}`}
-        seed={index + 5}
-        className="max-h-[85svh] w-auto max-w-full rounded-lg"
-      />
+      <div className="flex max-h-[85svh] max-w-full" onClick={(event) => event.stopPropagation()}>
+        <Photo
+          src={photos[index]}
+          alt={`Photograph ${index + 1}`}
+          seed={index + 5}
+          sizes="100vw"
+          className="max-h-[85svh] w-auto max-w-full rounded-lg [&>img]:h-auto [&>img]:max-h-[85svh] [&>img]:w-auto [&>img]:max-w-full [&>img]:object-contain"
+        />
+      </div>
 
       {photos.length > 1 ? (
         <>
@@ -262,12 +266,13 @@ function Lightbox({
               onIndex((index + 1) % photos.length)
             }}
           />
-          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-white/70">
+          <p className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1.5 text-sm text-white/80">
             {index + 1} / {photos.length}
           </p>
         </>
       ) : null}
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -287,7 +292,7 @@ function NavButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "absolute top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white outline-none hover:bg-white/20 focus-visible:ring-3 focus-visible:ring-white/50",
+        "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/20 outline-none hover:bg-black/75 focus-visible:ring-3 focus-visible:ring-white/50",
         side === "left" ? "left-3" : "right-3"
       )}
     >

@@ -2,10 +2,13 @@
 
 import * as React from "react"
 import { Check, Loader2, X } from "lucide-react"
+import { ApiError } from "@/lib/api-client"
+import { submitRsvp } from "@/lib/guests"
+import { useRsvpTarget } from "@/components/invitation/rsvp-context"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatDate } from "@/lib/format"
 import { cn } from "@/lib/utils"
-import type { EventRecord } from "@/lib/types"
+import type { InvitationEvent } from "@/lib/types"
 
 type Answer = "yes" | "no"
 type Phase = "idle" | "submitting" | "done"
@@ -18,15 +21,19 @@ export function InvitationRsvpForm({
   event,
   guestName,
 }: {
-  event: EventRecord
+  event: InvitationEvent
   /** Pre-filled when the guest arrives via a personal link. */
   guestName?: string
 }) {
   const { t, locale } = useLocale()
+  const target = useRsvpTarget()
+  const invited = target?.guest ?? null
 
   const [answer, setAnswer] = React.useState<Answer | null>(null)
-  const [name, setName] = React.useState(guestName ?? "")
-  const [seats, setSeats] = React.useState(2)
+  const [name, setName] = React.useState(invited?.name ?? guestName ?? "")
+  // Default to everything they were offered: the common reply is "all of us",
+  // and a household invited for five should not have to count up from two.
+  const [seats, setSeats] = React.useState(invited?.partySize ?? 2)
   const [message, setMessage] = React.useState("")
   const [phase, setPhase] = React.useState<Phase>("idle")
   const [error, setError] = React.useState<string>()
@@ -35,15 +42,42 @@ export function InvitationRsvpForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim()) {
+    // A guest arriving by their own link is already named; anyone else has to
+    // say who they are, or the reply cannot be reconciled with the list.
+    if (!invited && !name.trim()) {
       setError(locale === "km" ? "សូមបញ្ចូលឈ្មោះរបស់អ្នក" : "Please enter your name")
       return
     }
     setError(undefined)
     setPhase("submitting")
-    // Stands in for the API call.
-    await new Promise((resolve) => setTimeout(resolve, 700))
-    setPhase("done")
+
+    // No target means the builder's preview. Show the confirmation so the
+    // couple can see what a guest sees, but never record anything.
+    if (!target) {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setPhase("done")
+      return
+    }
+
+    try {
+      await submitRsvp(target.slug, {
+        token: target.token,
+        name: invited ? undefined : name.trim(),
+        attending: answer !== "no",
+        seats: answer === "no" ? 0 : seats,
+        message: message.trim() || undefined,
+      })
+      setPhase("done")
+    } catch (caught) {
+      setPhase("idle")
+      setError(
+        caught instanceof ApiError && caught.message
+          ? caught.message
+          : locale === "km"
+            ? "មិនអាចផ្ញើចម្លើយបានទេ សូមព្យាយាមម្ដងទៀត"
+            : "Your reply could not be sent. Please try again."
+      )
+    }
   }
 
   if (phase === "done") {

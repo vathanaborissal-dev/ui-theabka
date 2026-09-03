@@ -1,5 +1,7 @@
 import type { Currency, Locale } from "@/lib/types"
 
+export const CAMBODIA_TIME_ZONE = "Asia/Phnom_Penh"
+
 const KHMER_DIGITS = ["០", "១", "២", "៣", "៤", "៥", "៦", "៧", "៨", "៩"]
 
 const KHMER_MONTHS = [
@@ -10,6 +12,27 @@ const KHMER_MONTHS = [
 const KHMER_WEEKDAYS = [
   "អាទិត្យ", "ច័ន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍",
 ]
+
+const WEEKDAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+function cambodiaDateParts(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CAMBODIA_TIME_ZONE,
+    weekday: "short",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(date)
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? ""
+
+  return {
+    year: Number(value("year")),
+    month: Number(value("month")) - 1,
+    day: Number(value("day")),
+    weekday: WEEKDAY_KEYS.indexOf(value("weekday")),
+  }
+}
 
 /** Renders Latin digits in Khmer numerals, leaving other characters intact. */
 export function toKhmerDigits(input: string | number) {
@@ -70,10 +93,11 @@ export function formatDate(iso: string, locale: Locale = "en", style: DateStyle 
   if (Number.isNaN(d.getTime())) return ""
 
   if (locale === "km") {
-    const day = toKhmerDigits(d.getDate())
-    const month = KHMER_MONTHS[d.getMonth()]
-    const year = toKhmerDigits(d.getFullYear())
-    const weekday = KHMER_WEEKDAYS[d.getDay()]
+    const cambodia = cambodiaDateParts(d)
+    const day = toKhmerDigits(cambodia.day)
+    const month = KHMER_MONTHS[cambodia.month]
+    const year = toKhmerDigits(cambodia.year)
+    const weekday = KHMER_WEEKDAYS[cambodia.weekday]
     switch (style) {
       case "full":
         return `ថ្ងៃ${weekday} ទី${day} ខែ${month} ឆ្នាំ${year}`
@@ -82,7 +106,7 @@ export function formatDate(iso: string, locale: Locale = "en", style: DateStyle 
       case "dayMonth":
         return `${day} ${month}`
       case "short":
-        return `${day}/${toKhmerDigits(d.getMonth() + 1)}/${year}`
+        return `${day}/${toKhmerDigits(cambodia.month + 1)}/${year}`
       default:
         return `${day} ${month} ${year}`
     }
@@ -95,7 +119,58 @@ export function formatDate(iso: string, locale: Locale = "en", style: DateStyle 
     short: { day: "2-digit", month: "2-digit", year: "numeric" },
     dayMonth: { day: "numeric", month: "short" },
   }
-  return new Intl.DateTimeFormat("en-GB", options[style]).format(d)
+  return new Intl.DateTimeFormat("en-GB", {
+    ...options[style],
+    timeZone: CAMBODIA_TIME_ZONE,
+  }).format(d)
+}
+
+/** Date and exact local time for audit records and other operational history. */
+export function formatDateTime(iso: string, locale: Locale = "en") {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ""
+
+  return new Intl.DateTimeFormat(locale === "km" ? "km-KH" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: CAMBODIA_TIME_ZONE,
+  }).format(date)
+}
+
+/**
+ * The day and month as separate, already-localised strings.
+ *
+ * For layouts that set the numeral apart from the month rather than printing a
+ * sentence. It goes through the same Cambodia-pinned parts as `formatDate`
+ * instead of calling `Intl` directly: a bare `Intl.DateTimeFormat` resolves
+ * against the running machine's timezone and ICU data, which differ between the
+ * server render and the browser — that mismatch is a hydration error, and in
+ * Khmer it also yields English month names, since the Khmer months here are a
+ * hand-written table rather than something ICU supplies.
+ */
+export function dateFieldParts(iso: string, locale: Locale = "en") {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return { day: "", month: "", year: "" }
+
+  const parts = cambodiaDateParts(d)
+  if (locale === "km") {
+    return {
+      day: toKhmerDigits(parts.day),
+      month: `ខែ${KHMER_MONTHS[parts.month]}`,
+      year: toKhmerDigits(parts.year),
+    }
+  }
+  return {
+    day: String(parts.day),
+    month: new Intl.DateTimeFormat("en-GB", {
+      month: "long",
+      timeZone: CAMBODIA_TIME_ZONE,
+    }).format(d),
+    year: String(parts.year),
+  }
 }
 
 /**
@@ -110,8 +185,14 @@ export function formatTime(value: string, locale: Locale = "en", compact = false
   } else {
     const d = new Date(value)
     if (Number.isNaN(d.getTime())) return ""
-    hours = d.getHours()
-    minutes = d.getMinutes()
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: CAMBODIA_TIME_ZONE,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(d)
+    hours = Number(parts.find((part) => part.type === "hour")?.value)
+    minutes = Number(parts.find((part) => part.type === "minute")?.value)
   }
 
   if (locale === "km") {
@@ -130,9 +211,12 @@ export function formatTime(value: string, locale: Locale = "en", compact = false
 /** Whole days from `now` until the event. Negative once it has passed. */
 export function daysUntil(iso: string, now: Date = new Date()) {
   const target = new Date(iso)
-  const startOfTarget = new Date(target.getFullYear(), target.getMonth(), target.getDate())
-  const startOfNow = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  return Math.round((startOfTarget.getTime() - startOfNow.getTime()) / 86400000)
+  if (Number.isNaN(target.getTime())) return 0
+  const targetParts = cambodiaDateParts(target)
+  const nowParts = cambodiaDateParts(now)
+  const targetDay = Date.UTC(targetParts.year, targetParts.month, targetParts.day)
+  const currentDay = Date.UTC(nowParts.year, nowParts.month, nowParts.day)
+  return Math.round((targetDay - currentDay) / 86400000)
 }
 
 export function timeParts(iso: string, now: Date = new Date()) {

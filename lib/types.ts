@@ -61,6 +61,14 @@ export type Venue = {
   lng?: number
 }
 
+/**
+ * Who a ceremony is for. A Khmer wedding runs from dawn to night, but most
+ * invited guests attend only the reception — without this the schedule reads
+ * as an eight-item commitment and guests arrive at the wrong hour, or not at
+ * all. Undefined means everyone, so existing schedules keep working.
+ */
+export type ScheduleAudience = "all" | "family"
+
 export type ScheduleItem = {
   id: string
   /** 24h "HH:mm". */
@@ -69,6 +77,7 @@ export type ScheduleItem = {
   description?: LocalizedText
   /** Lucide icon name, chosen in the builder. */
   icon?: string
+  audience?: ScheduleAudience
 }
 
 export type ContactPerson = {
@@ -95,7 +104,22 @@ export type PhotoFrameId =
   | "kbach"
 
 /** How sections arrive as the guest scrolls. */
-export type EntranceId = "none" | "fade" | "rise" | "zoom" | "unfold"
+export type EntranceId =
+  | "none"
+  | "fade"
+  | "rise"
+  | "settle"
+  | "zoom"
+  | "unfold"
+  | "driftLeft"
+  | "driftRight"
+  | "soften"
+  | "tilt"
+  | "curtain"
+  | "sweep"
+  | "flip"
+  | "bloom"
+  | "glide"
 
 /** Drifting decoration layered over the whole card. */
 export type AmbientId = "none" | "petals" | "lotus" | "sparkle" | "gold-dust"
@@ -104,6 +128,27 @@ export type GalleryLayoutId = "grid" | "carousel" | "masonry" | "strip"
 
 /** Motion applied to the cover photo itself. */
 export type CoverMotionId = "none" | "kenburns" | "float"
+
+export type NamePlateId =
+  | "none"
+  | "gold"
+  | "ivory"
+  | "scroll"
+  | "modern"
+  | "emerald"
+
+/** The fixed layer behind the whole card; see lib/invitation/backdrops.ts. */
+export type BackdropId =
+  | "none"
+  | "photo"
+  | "custom"
+  | "damask"
+  | "video"
+  | "silk"
+  | "dawn"
+  | "garden"
+  | "temple"
+  | "paper"
 
 export type InvitationDesign = {
   templateId: string
@@ -122,6 +167,28 @@ export type InvitationDesign = {
   coverMotion?: CoverMotionId
   /** Show the "tap to open" envelope before the card. */
   envelopeIntro?: boolean
+  /** Fixed layer behind the whole card; see lib/invitation/backdrops.ts. */
+  backdropId?: BackdropId
+  /** The couple's own background image, used when backdropId is "custom". */
+  backdropPhoto?: string
+  /** Looping background video, used when backdropId is "video". */
+  backdropVideo?: string
+  /** Plays once when the envelope is opened, before the card appears. */
+  introVideo?: string
+  /**
+   * Free-form colour overrides, applied on top of the chosen palette.
+   *
+   * The palettes are eight considered pairings; these two let a couple match a
+   * card to a dress or a venue's flowers, which no fixed list can anticipate.
+   * Primary is the bright metal — ornament, the cover title. Text is the
+   * darker one everything else is set in.
+   */
+  primaryColor?: string
+  textColor?: string
+  /** Built-in track id from lib/invitation/music.ts. */
+  musicId?: string
+  /** The couple's own uploaded track. Wins over musicId when both are set. */
+  musicUrl?: string
   /** Id from MOTIF_ASSETS for the couple illustration; falls back to the drawn pair. */
   coupleMotifId?: string
   /** Id from MOTIF_ASSETS for section-header rules; falls back to the drawn kbach. */
@@ -132,6 +199,12 @@ export type InvitationDesign = {
   cornerMotifId?: string
   greeting: LocalizedText
   message: LocalizedText
+  /**
+   * @deprecated The cover photo lives on the event (`EventRecord.coverPhoto`),
+   * where Settings edits it and link previews read it. Kept only so rows
+   * written before the move still render; `InvitationRenderer` resolves the two
+   * into this field before a template sees it. Do not write it.
+   */
   coverPhoto?: string
   gallery: string[]
   showRsvp: boolean
@@ -140,6 +213,27 @@ export type InvitationDesign = {
   showMap: boolean
   showGiftInfo: boolean
   giftNote?: LocalizedText
+  /** Bank QR images guests scan to send a gift, one per currency. */
+  giftQrUsd?: string
+  giftQrKhr?: string
+  /** Show the wall of messages guests left with their reply. */
+  showWishes?: boolean
+  /** Closing note of thanks, shown near the end of the card. */
+  thankYouTitle?: LocalizedText
+  thankYouNote?: LocalizedText
+  /** A drawn or photographed map of the venue, shown instead of the placeholder. */
+  venueMapImage?: string
+  /** Overrides the printed "Respectfully inviting" line above the guest name. */
+  honourLabel?: LocalizedText
+  /** Which frame the guest's name sits in; see lib/invitation/name-plates.ts. */
+  namePlateId?: NamePlateId
+  /**
+   * Drops the couple's names from the cover.
+   *
+   * For a cover photo that already has the names set into the artwork, where
+   * repeating them below is the thing that makes the card look homemade.
+   */
+  hideCoverNames?: boolean
   /** RSVP cut-off, ISO date. */
   rsvpDeadline?: string
 }
@@ -165,12 +259,57 @@ export type EventRecord = {
   currency: Currency
   design: InvitationDesign
   coverPhoto: string
+  /** When the invitation was last published. Absent if it never has been. */
+  publishedAt?: string
+  /**
+   * True when the draft has moved on from what guests are being served.
+   *
+   * The event row is the couple's working copy; the API keeps a separate
+   * snapshot of what /i/{slug} answers with. This is the difference between
+   * them, and it is what lets the builder say "published, with changes waiting"
+   * instead of implying every edit is already live.
+   */
+  hasUnpublishedChanges?: boolean
+  /**
+   * Head counts from the server, for the event list.
+   *
+   * The list does not load guests, so it cannot count them. These used to be
+   * derived from the provider's guest cache, which that page never fills — so
+   * every card read zero however many guests the event had.
+   */
+  guestCount?: number
+  confirmedCount?: number
   createdAt: string
 }
+
+/** The deliberately smaller event shape that an anonymous invitation may expose. */
+export type InvitationEvent = Pick<
+  EventRecord,
+  | "slug"
+  | "type"
+  | "title"
+  | "date"
+  | "timezone"
+  | "venue"
+  | "hosts"
+  | "contacts"
+  | "schedule"
+  | "description"
+  | "design"
+  | "coverPhoto"
+>
 
 export type Guest = {
   id: string
   eventId: string
+  /**
+   * The guest's own invitation link segment: /i/{slug}?g={token}.
+   *
+   * Assigned by the server and unguessable, because it is handed out in a chat
+   * message and forwarded onwards. Not the id — that is an internal key the
+   * public endpoint does not accept.
+   */
+  token: string
   name: string
   nameKm?: string
   phone?: string
@@ -218,6 +357,8 @@ export type Expense = {
   status: ExpenseStatus
   dueDate?: string
   note?: string
+  /** Optional proof of payment stored with the event. */
+  receiptUrl?: string
 }
 
 export type TaskCategory =

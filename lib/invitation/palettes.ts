@@ -204,6 +204,76 @@ export const PALETTES: InvitationPalette[] = [
     },
   },
   {
+    id: "emerald-gold",
+    name: { en: "Emerald & gold", km: "មរកត និងមាស" },
+    swatch: ["oklch(0.33 0.075 165)", "oklch(0.72 0.12 82)", "oklch(0.95 0.012 150)"],
+    /*
+     * Deep forest green on a pale misty ground, gold reserved for ornament.
+     *
+     * Green is the ink here rather than an accent: this card sets every heading
+     * in it, and the gold is the frame around the guest's name and the rules
+     * between sections — the proportions of a printed Cambodian card in green,
+     * where gold on gold would leave nothing to read.
+     */
+    vars: {
+      "--inv-bg": "oklch(0.96 0.012 150)",
+      "--inv-surface": "oklch(0.99 0.006 150 / 0.72)",
+      "--inv-fg": "oklch(0.33 0.075 165)",
+      "--inv-muted": "oklch(0.45 0.055 165)",
+      "--inv-accent": "oklch(0.33 0.075 165)",
+      "--inv-accent-contrast": "oklch(0.98 0.008 150)",
+      "--inv-gold": "oklch(0.72 0.12 82)",
+      "--inv-border": "oklch(0.55 0.05 165 / 0.3)",
+    },
+  },
+  {
+    id: "on-video",
+    name: { en: "Gold on video", km: "មាសលើវីដេអូ" },
+    swatch: ["oklch(0.36 0.03 60)", "oklch(0.68 0.1 78)", "oklch(0.97 0.008 60)"],
+    /*
+     * Built to sit on pale footage rather than on a card.
+     *
+     * Dark ink, not white. A wedding backdrop is almost always light — soft
+     * florals, sky, silk — and white type on it survives only behind a scrim,
+     * which turns the video into a grey rectangle and defeats the point of
+     * playing one. Warm brown on pale footage needs no scrim at all.
+     *
+     * Surfaces are translucent white so the few sections that genuinely need a
+     * ground — a form, a long list — sit on frosted glass rather than a slab.
+     */
+    vars: {
+      "--inv-bg": "oklch(0.99 0.006 70 / 0.55)",
+      "--inv-surface": "oklch(1 0 0 / 0.62)",
+      "--inv-fg": "oklch(0.36 0.03 60)",
+      "--inv-muted": "oklch(0.47 0.028 60)",
+      "--inv-accent": "oklch(0.58 0.088 74)",
+      "--inv-accent-contrast": "oklch(0.99 0.006 70)",
+      "--inv-gold": "oklch(0.68 0.1 78)",
+      "--inv-border": "oklch(0.62 0.06 74 / 0.35)",
+    },
+  },
+  {
+    id: "gold-ivory",
+    name: { en: "Gold on ivory", km: "មាសលើពណ៌ស" },
+    swatch: ["#B08E4F", "#f9af59", "#fffaf2"],
+    vars: {
+      "--inv-bg": "#fffaf2",
+      "--inv-surface": "#fffdf8",
+      /*
+       * Foreground is gold, not near-black. It reads as wrong in a palette
+       * file and right on the card: the Cambodian gold-on-ivory invitation
+       * sets its body copy in the same metal as its ornament, and a dark grey
+       * paragraph in the middle of one looks like a bug.
+       */
+      "--inv-fg": "#B08E4F",
+      "--inv-muted": "#a99163",
+      "--inv-accent": "#B08E4F",
+      "--inv-accent-contrast": "#49351e",
+      "--inv-gold": "#f9af59",
+      "--inv-border": "#e8d6b3",
+    },
+  },
+  {
     id: "ivory",
     name: { en: "Ivory", km: "ភ្លឺស" },
     swatch: ["oklch(0.28 0.005 265)", "oklch(0.72 0.006 265)", "oklch(0.99 0 0)"],

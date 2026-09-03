@@ -2,11 +2,15 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { imageSrcSet } from "@/lib/uploads"
 
 /**
- * Images in this prototype point at remote stock photos. `Photo` degrades to a
- * tasteful tinted placeholder when a URL is missing or fails to load, so the
- * invitation never shows a broken-image icon in front of a guest.
+ * Degrades to a tinted placeholder when a URL is missing or fails to load, so
+ * an invitation never shows a broken-image icon in front of a guest.
+ *
+ * Uploaded photos are served through Cloudinary, so this asks for the width the
+ * device actually needs rather than one fixed size for everyone — the reason
+ * photos live there. Pasted URLs and stock imagery pass through unchanged.
  */
 export function Photo({
   src,
@@ -14,16 +18,20 @@ export function Photo({
   className,
   seed = 0,
   rounded = true,
+  sizes = "100vw",
 }: {
   src?: string
   alt: string
   className?: string
+  /** CSS `sizes`; tells the browser how wide this will render. */
+  sizes?: string
   /** Varies the placeholder gradient so galleries don't look repetitive. */
   seed?: number
   rounded?: boolean
 }) {
   const [failed, setFailed] = React.useState(false)
   const showPlaceholder = !src || failed
+  const responsive = src ? imageSrcSet(src, { sizes }) : null
 
   // See Motif: an image that failed before hydration never fires onError, so
   // check the element itself once it is attached.
@@ -47,7 +55,9 @@ export function Photo({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           ref={checkOnMount}
-          src={src}
+          src={responsive?.src ?? src}
+          srcSet={responsive?.srcSet}
+          sizes={responsive?.sizes}
           alt={alt}
           loading="lazy"
           decoding="async"

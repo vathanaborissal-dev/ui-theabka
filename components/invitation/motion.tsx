@@ -38,8 +38,18 @@ export function useReducedMotion() {
 const entranceClass: Record<Exclude<EntranceId, "none">, string> = {
   fade: "inv-enter-fade",
   rise: "inv-enter-rise",
+  settle: "inv-enter-settle",
   zoom: "inv-enter-zoom",
   unfold: "inv-enter-unfold",
+  driftLeft: "inv-enter-drift-left",
+  driftRight: "inv-enter-drift-right",
+  soften: "inv-enter-soften",
+  tilt: "inv-enter-tilt",
+  curtain: "inv-enter-curtain",
+  sweep: "inv-enter-sweep",
+  flip: "inv-enter-flip",
+  bloom: "inv-enter-bloom",
+  glide: "inv-enter-glide",
 }
 
 /**

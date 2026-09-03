@@ -17,16 +17,29 @@ export function GuestHonour({
   guestName,
   className,
   variant = "ruled",
+  tone = "card",
 }: {
   guestName?: string
   className?: string
   variant?: "ruled" | "plain"
+  /**
+   * "light" is for an honour line sitting on a cover photograph, where the
+   * palette's own foreground colour would disappear into the image.
+   */
+  tone?: "card" | "light"
 }) {
   const { t } = useLocale()
 
   return (
     <div className={cn("mx-auto max-w-sm text-center", className)}>
-      <p className="text-[0.8125rem] tracking-[0.14em] text-(--inv-muted) uppercase">
+      <p
+        className={cn(
+          "text-[0.8125rem] tracking-[0.14em] uppercase",
+          tone === "light"
+            ? "text-white/85 drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)]"
+            : "text-(--inv-muted)"
+        )}
+      >
         {t("public.honour")}
       </p>
 
@@ -48,7 +61,12 @@ export function GuestHonour({
         </div>
       ) : (
         <p
-          className="mt-2 text-xl text-(--inv-fg)"
+          className={cn(
+            "mt-2 text-xl",
+            tone === "light"
+              ? "text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]"
+              : "text-(--inv-fg)"
+          )}
           style={{ fontFamily: "var(--inv-font-display)" }}
         >
           {guestName || t("public.honourGeneric")}

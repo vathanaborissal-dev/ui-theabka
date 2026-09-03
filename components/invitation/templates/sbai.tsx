@@ -109,7 +109,7 @@ export function SbaiTemplate({ event, guestName }: TemplateProps) {
         <div className="relative px-6 pb-4 @xl:px-10">
           <div className="mx-auto max-w-md border border-(--inv-gold)/45 bg-(--inv-bg) p-2">
             <FramedPhoto
-              src={design.coverPhoto ?? event.coverPhoto}
+              src={design.coverPhoto}
               alt=""
               seed={10}
               frame={design.photoFrame ?? "gold"}
@@ -121,42 +121,42 @@ export function SbaiTemplate({ event, guestName }: TemplateProps) {
       ) : null}
 
       <div className="relative mt-4 bg-(--inv-bg) text-(--inv-fg)">
-        <InvSection>
+        <InvSection section="letter">
           <p className="mx-auto max-w-md text-center text-base leading-loose text-(--inv-muted)">{L(design.message)}</p>
           <div className="mt-10"><InvitationCountdown variant="boxed" date={event.date} /></div>
           <p className="mt-8 text-center"><AddToCalendar event={event} /></p>
         </InvSection>
 
         {design.showSchedule && event.schedule.length > 0 ? (
-          <InvSection title={t("public.scheduleTitle")} ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
+          <InvSection title={t("public.scheduleTitle")} section="schedule" ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
             <InvitationSchedule items={event.schedule} variant="centred" />
           </InvSection>
         ) : null}
 
         {design.showGallery && design.gallery.length > 0 ? (
-          <InvSection title={t("inv.gallery")} ornament={orn.sectionOrnament}>
+          <InvSection title={t("inv.gallery")} section="gallery" ornament={orn.sectionOrnament}>
             <GalleryStrip photos={design.gallery} />
           </InvSection>
         ) : null}
 
-        <InvSection title={t("public.venueTitle")} ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
+        <InvSection title={t("public.venueTitle")} section="venue" ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
           <InvitationVenue variant="split" venue={event.venue} showMap={design.showMap} />
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (
-          <InvSection title={t("public.giftTitle")} ornament={orn.sectionOrnament}>
+          <InvSection title={t("public.giftTitle")} section="gift" ornament={orn.sectionOrnament}>
             <GiftNote note={design.giftNote} />
           </InvSection>
         ) : null}
 
         {design.showRsvp ? (
-          <InvSection id="rsvp" title={t("public.rsvpTitle")} ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
+          <InvSection id="rsvp" title={t("public.rsvpTitle")} section="rsvp" ornament={orn.sectionOrnament} className="bg-(--inv-surface)">
             <InvitationRsvpForm event={event} guestName={guestName} />
           </InvSection>
         ) : null}
 
         {event.contacts.length > 0 ? (
-          <InvSection title={t("public.contactHosts")} ornament="rule">
+          <InvSection title={t("public.contactHosts")} section="contacts" ornament="rule">
             <ContactList contacts={event.contacts} />
           </InvSection>
         ) : null}

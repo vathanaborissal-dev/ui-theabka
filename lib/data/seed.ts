@@ -122,6 +122,7 @@ export const seedEvents: EventRecord[] = [
       {
         id: "sc_1",
         time: "06:30",
+        audience: "family",
         title: { en: "Groom's procession", km: "ពិធីហែជំនូន" },
         description: {
           en: "The groom's family walks to the bride's home carrying fruit and gifts.",
@@ -132,12 +133,14 @@ export const seedEvents: EventRecord[] = [
       {
         id: "sc_2",
         time: "08:00",
+        audience: "family",
         title: { en: "Monks' blessing", km: "ពិធីសូត្រមន្តជ័យតោ" },
         icon: "sparkles",
       },
       {
         id: "sc_3",
         time: "09:30",
+        audience: "family",
         title: { en: "Hair cutting ceremony", km: "ពិធីកាត់សក់" },
         description: {
           en: "A symbolic new beginning for the couple.",
@@ -148,6 +151,7 @@ export const seedEvents: EventRecord[] = [
       {
         id: "sc_4",
         time: "10:30",
+        audience: "family",
         title: { en: "Knot tying & Popil", km: "ពិធីសំពះផ្ទឹម និងបង្វិលពពិល" },
         description: {
           en: "Elders tie red thread on the couple's wrists and pass the popil candles.",
@@ -158,6 +162,7 @@ export const seedEvents: EventRecord[] = [
       {
         id: "sc_5",
         time: "11:30",
+        audience: "family",
         title: { en: "Family lunch", km: "អាហារថ្ងៃត្រង់ជាមួយគ្រួសារ" },
         icon: "utensils",
       },
@@ -281,8 +286,8 @@ export const seedEvents: EventRecord[] = [
       },
     ],
     schedule: [
-      { id: "es_1", time: "07:00", title: { en: "Arrival of the groom's family", km: "គ្រួសារខាងកូនប្រុសមកដល់" } },
-      { id: "es_2", time: "08:00", title: { en: "Exchange of gifts", km: "ពិធីប្រគល់ជំនូន" } },
+      { id: "es_1", time: "07:00", title: { en: "Arrival of the groom's family", km: "គ្រួសារខាងកូនប្រុសមកដល់" }, audience: "family" },
+      { id: "es_2", time: "08:00", title: { en: "Exchange of gifts", km: "ពិធីប្រគល់ជំនូន" }, audience: "family" },
       { id: "es_3", time: "10:00", title: { en: "Lunch together", km: "អាហារថ្ងៃត្រង់រួមគ្នា" } },
     ],
     description: {
@@ -526,6 +531,7 @@ function makeWeddingGuests(): Guest[] {
     guests.push({
       id: `g_${(i + 1).toString().padStart(3, "0")}`,
       eventId: "evt_wedding",
+      token: `seed_${(i + 1).toString().padStart(3, "0")}`,
       name,
       nameKm: `${snKm} ${gnKm}`,
       phone: rng() < 0.88 ? phone(rng) : undefined,
@@ -577,6 +583,7 @@ function makeSmallGuestList(eventId: string, seed: number, count: number): Guest
     guests.push({
       id: `${eventId}_g${i + 1}`,
       eventId,
+      token: `seed_${eventId}_${i + 1}`,
       name,
       nameKm: `${snKm} ${gnKm}`,
       phone: phone(rng),

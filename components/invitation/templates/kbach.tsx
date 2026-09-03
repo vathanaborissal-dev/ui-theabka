@@ -46,6 +46,7 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
   const { t, L, locale } = useLocale()
   const design = event.design
   const orn = useOrnaments(design, "rich")
+  const coverPhoto = design.coverPhoto
 
   return (
     <article
@@ -99,10 +100,10 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
           <p className="mt-1 text-sm text-(--inv-muted)">{formatTime(event.date, locale)}</p>
         </header>
 
-        {design.coverPhoto ? (
+        {coverPhoto ? (
           <div className="px-6 pb-4">
             <FramedPhoto
-              src={design.coverPhoto}
+              src={coverPhoto}
               alt=""
               seed={4}
               frame={design.photoFrame ?? "gold"}
@@ -113,7 +114,7 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
           </div>
         ) : null}
 
-        <InvSection>
+        <InvSection section="letter">
           <GuestHonour guestName={guestName} />
           <p className="mx-auto mt-8 max-w-md text-center text-base leading-loose text-(--inv-muted)">
             {L(design.message)}
@@ -128,7 +129,7 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
 
         {design.showSchedule && event.schedule.length > 0 ? (
           <InvSection
-            title={t("public.scheduleTitle")}
+            title={t("public.scheduleTitle")} section="schedule"
             ornament="kbach"
             className="bg-(--inv-surface)"
           >
@@ -137,13 +138,13 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {design.showGallery && design.gallery.length > 0 ? (
-          <InvSection title={t("inv.gallery")} ornament="lotus">
+          <InvSection title={t("inv.gallery")} section="gallery" ornament="lotus">
             <GalleryStrip photos={design.gallery} />
           </InvSection>
         ) : null}
 
         <InvSection
-          title={t("public.venueTitle")}
+          title={t("public.venueTitle")} section="venue"
           ornament="kbach"
           className="bg-(--inv-surface)"
         >
@@ -151,7 +152,7 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (
-          <InvSection title={t("public.giftTitle")} ornament="lotus">
+          <InvSection title={t("public.giftTitle")} section="gift" ornament="lotus">
             <GiftNote note={design.giftNote} />
           </InvSection>
         ) : null}
@@ -159,7 +160,7 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
         {design.showRsvp ? (
           <InvSection
             id="rsvp"
-            title={t("public.rsvpTitle")}
+            title={t("public.rsvpTitle")} section="rsvp"
             ornament="kbach"
             className="bg-(--inv-surface)"
           >
@@ -168,7 +169,7 @@ export function KbachTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {event.contacts.length > 0 ? (
-          <InvSection title={t("public.contactHosts")} ornament="rule">
+          <InvSection title={t("public.contactHosts")} section="contacts" ornament="rule">
             <ContactList contacts={event.contacts} />
           </InvSection>
         ) : null}

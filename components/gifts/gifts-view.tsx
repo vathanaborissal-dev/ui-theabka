@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/shared/empty-state"
 import { StatCard } from "@/components/shared/stat-card"
 import { Panel } from "@/components/shared/panel"
 import { RecordGiftDialog } from "@/components/guests/record-gift-dialog"
-import { useEventData } from "@/components/providers/data-provider"
+import { useAllGuests, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatMoney, formatNumber, initials } from "@/lib/format"
 import { giftStats } from "@/lib/stats"
@@ -26,7 +26,9 @@ const TIERS = [
 ] as const
 
 export function GiftsView({ eventId }: { eventId: string }) {
-  const { event, guests } = useEventData(eventId)
+  const { event } = useEventData(eventId)
+  // Loads every row on purpose — gift totals cover every guest.
+  const { guests } = useAllGuests(event?.id)
   const { t, L, locale } = useLocale()
 
   const [query, setQuery] = React.useState("")
@@ -76,6 +78,7 @@ export function GiftsView({ eventId }: { eventId: string }) {
       {withGift.length === 0 ? (
         <EmptyState
           icon={Coins}
+          mascotMotion="idle"
           title={t("gifts.empty.title")}
           description={t("gifts.empty.body")}
         />

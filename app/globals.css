@@ -69,6 +69,7 @@
   --font-khmer-sans: var(--font-kantumruy), "Khmer OS Battambang", "Noto Sans Khmer", sans-serif;
   --font-khmer-serif-stack: var(--font-noto-khmer-serif), var(--font-kantumruy), serif;
   --font-khmer-display-stack: var(--font-moul), var(--font-noto-khmer-serif), serif;
+  --font-latin-script: var(--font-great-vibes), cursive;
 
   --font-mono-ui: ui-monospace, "SF Mono", Menlo, monospace;
 
@@ -449,9 +450,20 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Print. The only thing worth printing from the dashboard is the QR insert
-   card that goes inside a physical invitation, so everything else is hidden
-   and the card is centred on the sheet.
+   Print.
+
+   What is worth printing from the dashboard is the QR insert that goes inside
+   a physical invitation — and one per guest, not one for the event: each card
+   carries that guest's own link, so the card greets them by name and their
+   reply lands on the right row.
+
+   Sized in millimetres because this is paper. Two across an A4 with 12mm
+   margins leaves 186mm, so 88mm cards sit side by side with room between, and
+   `break-inside: avoid` keeps a card from being cut in half by a page break.
+
+   There is no PDF writer here on purpose: every print dialogue already has
+   "Save as PDF", and it produces selectable text and crisp vector QR codes,
+   which a canvas-drawn PDF of our own would not.
    --------------------------------------------------------------------------- */
 @media print {
   body {
@@ -466,24 +478,61 @@
     display: none !important;
   }
 
-  [data-print="card"] {
+  /*
+   * The camera poster, printed alone and large.
+   *
+   * Same route as the insert sheet: the dashboard is hidden and one thing is
+   * left standing, so "Save as PDF" in the print dialogue produces a poster
+   * rather than a screenshot of an admin page.
+   */
+  [data-print="poster"] {
     position: fixed;
     inset: 0;
     display: flex !important;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: auto !important;
     margin: 0;
-    padding: 0;
     border: none !important;
-    box-shadow: none !important;
+    padding: 0;
+    text-align: center;
   }
 
-  [data-print="card"] * {
-    box-shadow: none !important;
+  [data-print="poster"] svg {
+    width: 120mm;
+    height: 120mm;
+  }
+
+  [data-print="poster"] .poster-eyebrow {
+    font-size: 12pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6b6257;
+    margin-bottom: 10mm;
+  }
+
+  [data-print="poster"] .poster-caption {
+    margin-top: 10mm;
+    font-size: 24pt;
+    font-weight: 600;
+  }
+
+  [data-print="poster"] .poster-note {
+    margin-top: 3mm;
+    font-size: 13pt;
+    color: #4a443c;
+  }
+
+  [data-print="poster"] .poster-url {
+    margin-top: 14mm;
+    font-family: ui-monospace, monospace;
+    font-size: 9pt;
+    color: #7a6f5d;
   }
 
   @page {
-    margin: 16mm;
+    margin: 12mm;
   }
 }
 
@@ -760,6 +809,122 @@
     transform-origin: top center;
   }
 
+  /*
+   * The rest of the set.
+   *
+   * Each pairs an idle pose with a matching keyframe, because the idle class is
+   * what holds the element before it scrolls into view — an animation without
+   * one starts from wherever the element already sits and reads as a twitch.
+   */
+  .inv-enter-drift-left.inv-enter-idle {
+    transform: translateX(-28px);
+  }
+  .inv-enter-drift-left.inv-enter-shown {
+    animation-name: inv-drift-left;
+  }
+  .inv-enter-drift-right.inv-enter-idle {
+    transform: translateX(28px);
+  }
+  .inv-enter-drift-right.inv-enter-shown {
+    animation-name: inv-drift-right;
+  }
+  .inv-enter-settle.inv-enter-idle {
+    transform: translateY(-22px);
+  }
+  .inv-enter-settle.inv-enter-shown {
+    animation-name: inv-settle;
+  }
+  .inv-enter-soften.inv-enter-idle {
+    filter: blur(7px);
+  }
+  .inv-enter-soften.inv-enter-shown {
+    animation-name: inv-soften;
+  }
+  .inv-enter-tilt.inv-enter-idle {
+    transform: perspective(900px) rotateX(9deg) translateY(16px);
+    transform-origin: top center;
+  }
+  .inv-enter-tilt.inv-enter-shown {
+    animation-name: inv-tilt;
+    transform-origin: top center;
+  }
+
+  .inv-enter-curtain.inv-enter-idle {
+    clip-path: inset(0 0 100% 0);
+  }
+  .inv-enter-curtain.inv-enter-shown {
+    animation-name: inv-curtain;
+  }
+  .inv-enter-sweep.inv-enter-idle {
+    clip-path: inset(0 100% 0 0);
+  }
+  .inv-enter-sweep.inv-enter-shown {
+    animation-name: inv-sweep;
+  }
+  .inv-enter-flip.inv-enter-idle {
+    transform: perspective(1000px) rotateX(-70deg);
+    transform-origin: top center;
+  }
+  .inv-enter-flip.inv-enter-shown {
+    animation-name: inv-flip;
+    transform-origin: top center;
+  }
+  .inv-enter-bloom.inv-enter-idle {
+    transform: scale(1.06);
+    filter: blur(5px);
+  }
+  .inv-enter-bloom.inv-enter-shown {
+    animation-name: inv-bloom;
+  }
+  .inv-enter-glide.inv-enter-idle {
+    transform: translateY(34px) scale(0.97);
+  }
+  .inv-enter-glide.inv-enter-shown {
+    animation-name: inv-glide;
+  }
+
+  @keyframes inv-curtain {
+    from { opacity: 0.4; clip-path: inset(0 0 100% 0); }
+    to { opacity: 1; clip-path: inset(0 0 0 0); }
+  }
+  @keyframes inv-sweep {
+    from { opacity: 0.4; clip-path: inset(0 100% 0 0); }
+    to { opacity: 1; clip-path: inset(0 0 0 0); }
+  }
+  @keyframes inv-flip {
+    from { opacity: 0; transform: perspective(1000px) rotateX(-70deg); }
+    to { opacity: 1; transform: perspective(1000px) rotateX(0deg); }
+  }
+  @keyframes inv-bloom {
+    from { opacity: 0; transform: scale(1.06); filter: blur(5px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes inv-glide {
+    from { opacity: 0; transform: translateY(34px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes inv-drift-left {
+    from { opacity: 0; transform: translateX(-28px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes inv-drift-right {
+    from { opacity: 0; transform: translateX(28px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes inv-settle {
+    from { opacity: 0; transform: translateY(-22px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes inv-soften {
+    from { opacity: 0; filter: blur(7px); }
+    to { opacity: 1; filter: blur(0); }
+  }
+  @keyframes inv-tilt {
+    from { opacity: 0; transform: perspective(900px) rotateX(9deg) translateY(16px); }
+    to { opacity: 1; transform: perspective(900px) rotateX(0deg) translateY(0); }
+  }
+
   @keyframes inv-fade {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -819,4 +984,88 @@
     from { transform: translateY(18%) scale(0.96); opacity: 0; }
     to { transform: translateY(0) scale(1); opacity: 1; }
   }
+}
+
+/*
+ * Route-navigation loading dots.
+ *
+ * Route changes already reveal a content skeleton, so the clicked navigation
+ * item keeps this deliberately neutral hint instead of showing the animated
+ * mascot at the same time. The timing still comes from Thiep's face dots.
+ */
+@keyframes brand-blink {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-22%); }
+}
+
+/* Do not flash a character for a route that resolves almost immediately. */
+@media (prefers-reduced-motion: no-preference) {
+  .event-switch-mascot {
+    opacity: 0;
+    animation: event-switch-mascot-in 160ms ease-out 100ms forwards;
+  }
+}
+
+@keyframes event-switch-mascot-in {
+  to { opacity: 1; }
+}
+
+/*
+ * The drawings animate internally, but that motion becomes almost invisible
+ * when a 140px SVG is reduced to button size. This outer layer keeps each
+ * action legible at its rendered size while the illustration retains its own
+ * facial and prop animation.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .mascot-motion {
+    transform-origin: center bottom;
+    will-change: transform;
+  }
+
+  .mascot-motion--loading,
+  .mascot-motion--loading-reverse,
+  .mascot-motion--waving {
+    animation: mascot-bob 1.15s ease-in-out infinite;
+  }
+
+  .mascot-motion--idle {
+    animation: mascot-breathe 2.8s ease-in-out infinite;
+  }
+
+  .mascot-motion--thinking {
+    animation: mascot-think 2.2s ease-in-out infinite;
+  }
+
+  .mascot-motion--happy {
+    animation: mascot-celebrate 900ms cubic-bezier(.3, 0, .35, 1) infinite;
+  }
+
+  .mascot-motion--pushing {
+    animation: mascot-push 1.35s ease-in-out infinite;
+  }
+}
+
+@keyframes mascot-bob {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  50% { transform: translate3d(0, -4px, 0) rotate(1deg); }
+}
+
+@keyframes mascot-breathe {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -3px, 0) scale(1.035); }
+}
+
+@keyframes mascot-think {
+  0%, 100% { transform: translate3d(-2px, 0, 0) rotate(-2deg); }
+  50% { transform: translate3d(2px, -3px, 0) rotate(2deg); }
+}
+
+@keyframes mascot-celebrate {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  45% { transform: translate3d(0, -7px, 0) scale(1.03); }
+}
+
+@keyframes mascot-push {
+  0%, 100% { transform: translate3d(-2px, 0, 0) rotate(-1deg); }
+  55% { transform: translate3d(4px, 0, 0) rotate(1deg); }
 }

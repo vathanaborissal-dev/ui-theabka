@@ -6,6 +6,7 @@ import { LotusMark } from "@/components/invitation/ornaments"
 import { InvitationSchedule } from "../sections/schedule"
 import { InvitationVenue } from "../sections/venue"
 import { InvitationRsvpForm } from "../sections/rsvp-form"
+import { GuestHonour } from "../sections/guest-honour"
 import {
   AddToCalendar,
   ContactList,
@@ -53,6 +54,9 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
         <p className="mt-8 text-base text-(--inv-fg)">{formatDate(event.date, locale, "full")}</p>
         <p className="mt-1 text-sm text-(--inv-muted)">{formatTime(event.date, locale)}</p>
 
+        <span data-inv-section="letter" className="block" aria-hidden="true" />
+        <GuestHonour guestName={guestName} variant="plain" className="mt-10" />
+
         <p className="mt-8 text-base leading-loose text-(--inv-muted)">{L(design.message)}</p>
 
         <p className="mt-8">
@@ -62,7 +66,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
 
       {design.showSchedule && event.schedule.length > 0 ? (
         <InvSection align="left"
-          title={t("public.scheduleTitle")}
+          title={t("public.scheduleTitle")} section="schedule"
           ornament="rule"
           className="border-t border-(--inv-border)"
         >
@@ -71,7 +75,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
       ) : null}
 
       <InvSection align="left"
-        title={t("public.venueTitle")}
+        title={t("public.venueTitle")} section="venue"
         ornament="rule"
         className="border-t border-(--inv-border)"
       >
@@ -80,7 +84,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
 
       {design.showGiftInfo && design.giftNote ? (
         <InvSection align="left"
-          title={t("public.giftTitle")}
+          title={t("public.giftTitle")} section="gift"
           ornament="rule"
           className="border-t border-(--inv-border)"
         >
@@ -91,7 +95,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
       {design.showRsvp ? (
         <InvSection align="left"
           id="rsvp"
-          title={t("public.rsvpTitle")}
+          title={t("public.rsvpTitle")} section="rsvp"
           ornament="rule"
           className="border-t border-(--inv-border)"
         >
@@ -101,7 +105,7 @@ export function SilaTemplate({ event, guestName }: TemplateProps) {
 
       {event.contacts.length > 0 ? (
         <InvSection align="left"
-          title={t("public.contactHosts")}
+          title={t("public.contactHosts")} section="contacts"
           ornament="rule"
           className="border-t border-(--inv-border)"
         >

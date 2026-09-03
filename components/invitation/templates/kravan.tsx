@@ -8,6 +8,7 @@ import { InvitationCountdown } from "../sections/countdown"
 import { InvitationSchedule } from "../sections/schedule"
 import { InvitationVenue } from "../sections/venue"
 import { InvitationRsvpForm } from "../sections/rsvp-form"
+import { GuestHonour } from "../sections/guest-honour"
 import {
   AddToCalendar,
   ContactList,
@@ -36,7 +37,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
     <article data-inv-template="kravan" className="bg-(--inv-bg) text-(--inv-fg)">
       <header className="relative flex min-h-[86svh] flex-col justify-end overflow-hidden">
         <Photo
-          src={design.coverPhoto ?? event.coverPhoto}
+          src={design.coverPhoto}
           alt=""
           seed={4}
           rounded={false}
@@ -72,7 +73,8 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
           first one lifts over the photo — so the card reads as a set of cards
           rather than one continuous scroll. */}
       <div className="relative -mt-14 space-y-5 rounded-t-[2rem] bg-(--inv-surface) px-4 pt-6 pb-10 @xl:-mt-20 @xl:space-y-6 @xl:px-8 @xl:pt-10">
-        <InvSection align="left" className={PANEL}>
+        <InvSection align="left" section="letter" className={PANEL}>
+          <GuestHonour guestName={guestName} variant="plain" className="mx-0 mb-5 text-left" />
           <p className="text-sm leading-relaxed text-(--inv-muted)">{L(design.greeting)}</p>
           <p className="mt-4 text-base leading-loose text-(--inv-fg)">{L(design.message)}</p>
           <div className="mt-8">
@@ -84,7 +86,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
 
         {design.showGallery && design.gallery.length > 0 ? (
-          <InvSection align="left" title={t("inv.gallery")} ornament="rule" className={PANEL}>
+          <InvSection align="left" title={t("inv.gallery")} section="gallery" ornament="rule" className={PANEL}>
             <GalleryStrip photos={design.gallery} />
           </InvSection>
         ) : null}
@@ -92,7 +94,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
         {design.showSchedule && event.schedule.length > 0 ? (
           <InvSection
             align="left"
-            title={t("public.scheduleTitle")}
+            title={t("public.scheduleTitle")} section="schedule"
             ornament="rule"
             className={PANEL}
           >
@@ -102,7 +104,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
 
         <InvSection
           align="left"
-          title={t("public.venueTitle")}
+          title={t("public.venueTitle")} section="venue"
           ornament="rule"
           className={PANEL}
         >
@@ -110,7 +112,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (
-          <InvSection align="left" title={t("public.giftTitle")} ornament="rule" className={PANEL}>
+          <InvSection align="left" title={t("public.giftTitle")} section="gift" ornament="rule" className={PANEL}>
             <GiftNote note={design.giftNote} />
           </InvSection>
         ) : null}
@@ -119,7 +121,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
           <InvSection
             align="left"
             id="rsvp"
-            title={t("public.rsvpTitle")}
+            title={t("public.rsvpTitle")} section="rsvp"
             ornament="rule"
             className={PANEL}
           >
@@ -130,7 +132,7 @@ export function KravanTemplate({ event, guestName }: TemplateProps) {
         {event.contacts.length > 0 ? (
           <InvSection
             align="left"
-            title={t("public.contactHosts")}
+            title={t("public.contactHosts")} section="contacts"
             ornament="rule"
             className={PANEL}
           >

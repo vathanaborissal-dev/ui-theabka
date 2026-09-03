@@ -1,24 +1,26 @@
 "use client"
 
 import * as React from "react"
-import {
-  CalendarDays,
+import { useRouter } from "next/navigation"
+import {CalendarDays,
   Check,
   Copy,
+  Crop,
   ExternalLink,
+  Image as ImageIcon,
   Link2,
   MapPin,
   Palette,
+  Share2,
   TriangleAlert,
   Trash2,
-  Users,
-} from "lucide-react"
+  Users} from "lucide-react"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -38,7 +40,8 @@ import { TimePicker } from "@/components/ui/time-picker"
 import { PageHeader } from "@/components/shared/page-header"
 import { BilingualField } from "@/components/invitation/builder/bilingual-field"
 import { APP_THEMES } from "@/lib/themes"
-import { useData, useEventData } from "@/components/providers/data-provider"
+import { useData, useEventData, type EventSaveState } from "@/components/providers/data-provider"
+import { CoverPhotoField } from "@/components/shared/cover-photo-field"
 import { useLocale } from "@/components/providers/locale-provider"
 import { useTheme } from "@/components/providers/theme-provider"
 import { cn } from "@/lib/utils"
@@ -49,11 +52,14 @@ import type { Currency } from "@/lib/types"
 const SECTIONS = [
   { id: "details", labelKey: "settings.details", icon: CalendarDays },
   { id: "link", labelKey: "settings.link", icon: Link2 },
+  { id: "cover", labelKey: "settings.cover", icon: ImageIcon },
   { id: "venue", labelKey: "public.venueTitle", icon: MapPin },
   { id: "labels", labelKey: "settings.labels", icon: Users },
   { id: "theme", labelKey: "common.theme", icon: Palette },
   { id: "danger", labelKey: "settings.danger", icon: TriangleAlert },
 ] as const
+
+const DELETE_CONFIRMATION = "DELETE"
 
 /**
  * Sticky index of the page.
@@ -149,8 +155,7 @@ function SettingsSection({
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
         </div>
       </header>
-      {/* Capped measure: controls stay readable rather than full-bleed. */}
-      <div className="max-w-2xl space-y-5 p-5">{children}</div>
+      <div className="space-y-5 p-5">{children}</div>
     </section>
   )
 }
@@ -187,35 +192,33 @@ function useActiveSection() {
  * Every field here writes on change, which is friendlier than a save button but
  * leaves the reader with no idea whether anything happened. This confirms it.
  */
-function SavedIndicator({ token }: { token: number }) {
+function SavedIndicator({ state }: { state: EventSaveState }) {
   const { t } = useLocale()
-  const [visible, setVisible] = React.useState(false)
-  const first = React.useRef(true)
-
-  React.useEffect(() => {
-    // Skip the mount pass: nothing has been edited yet.
-    if (first.current) {
-      first.current = false
-      return
-    }
-    setVisible(true)
-    const id = window.setTimeout(() => setVisible(false), 2000)
-    return () => window.clearTimeout(id)
-  }, [token])
 
   return (
     <p
       aria-live="polite"
       className={cn(
         "flex items-center gap-1.5 text-xs transition-opacity duration-200",
-        visible ? "text-success opacity-100" : "text-muted-foreground opacity-70"
+        state === "error"
+          ? "text-destructive"
+          : state === "saved"
+            ? "text-success"
+            : "text-muted-foreground"
       )}
     >
-      {visible ? (
+      {state === "saving" ? (
+        <>
+          <BrandSpinner />
+          {t("settings.saving")}
+        </>
+      ) : state === "saved" ? (
         <>
           <Check className="size-3.5" aria-hidden="true" />
           {t("settings.saved")}
         </>
+      ) : state === "error" ? (
+        t("settings.saveFailed")
       ) : (
         t("settings.autosaves")
       )}
@@ -225,14 +228,15 @@ function SavedIndicator({ token }: { token: number }) {
 
 export function SettingsView({ eventId }: { eventId: string }) {
   const { event } = useEventData(eventId)
-  const { updateEvent } = useData()
+  const { updateEvent, removeEvent, eventSaveState } = useData()
   const { t, locale } = useLocale()
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
 
-  // Bumped on every edit so the indicator knows something landed.
-  const [savedToken, setSavedToken] = React.useState(0)
   const [copied, setCopied] = React.useState(false)
   const [confirmDelete, setConfirmDelete] = React.useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = React.useState("")
+  const [deleting, setDeleting] = React.useState(false)
   const active = useActiveSection()
 
   // window is absent during SSR, so the origin arrives on the client.
@@ -246,7 +250,6 @@ export function SettingsView({ eventId }: { eventId: string }) {
 
   const save = (patch: Parameters<typeof updateEvent>[1]) => {
     updateEvent(event.id, patch)
-    setSavedToken((n) => n + 1)
   }
 
   const publicUrl = `${origin}/i/${event.slug}`
@@ -262,11 +265,17 @@ export function SettingsView({ eventId }: { eventId: string }) {
     }
   }
 
+  function setDeleteDialogOpen(open: boolean) {
+    if (deleting) return
+    setConfirmDelete(open)
+    if (!open) setDeleteConfirmation("")
+  }
+
   return (
     <div className="mx-auto w-full max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <PageHeader title={t("nav.settings")} description={t("settings.subtitle")} />
-        <SavedIndicator token={savedToken} />
+        <SavedIndicator state={eventSaveState[event.id] ?? "idle"} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] lg:gap-10">
@@ -344,6 +353,38 @@ export function SettingsView({ eventId }: { eventId: string }) {
             {t("inv.preview")}
           </ButtonLink>
         </div>
+      </SettingsSection>
+
+      <SettingsSection
+        id="cover"
+        icon={ImageIcon}
+        title={t("settings.cover")}
+        description={t("settings.coverHelp")}
+      >
+        <CoverPhotoField
+          eventId={event.id}
+          value={event.coverPhoto || undefined}
+          onChange={(coverPhoto) => save({ coverPhoto: coverPhoto ?? "" })}
+          label={t("settings.coverAdd")}
+          hint={t("settings.coverHint")}
+        />
+
+        {/*
+          Where this image actually turns up. It is doing two jobs — one inside
+          the invitation, one outside it in a chat app someone else controls —
+          and the second is invisible from here, so it has to be said.
+        */}
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          <li>{t("settings.coverUseInvitation")}</li>
+          <li className="flex gap-2">
+            <Share2 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <span>{t("settings.coverUseShare")}</span>
+          </li>
+          <li className="flex gap-2">
+            <Crop className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <span>{t("settings.coverUseCrop")}</span>
+          </li>
+        </ul>
       </SettingsSection>
 
       <SettingsSection
@@ -465,7 +506,13 @@ export function SettingsView({ eventId }: { eventId: string }) {
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-medium">{t("settings.deleteEvent")}</p>
-          <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              setDeleteConfirmation("")
+              setConfirmDelete(true)
+            }}
+          >
             <Trash2 />
             {t("action.delete")}
           </Button>
@@ -475,25 +522,57 @@ export function SettingsView({ eventId }: { eventId: string }) {
       </div>
       </div>
 
-      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={confirmDelete} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md" showCloseButton={!deleting}>
           <DialogHeader>
             <DialogTitle>{t("settings.deleteEvent")}</DialogTitle>
             <DialogDescription>{t("settings.deleteHelp")}</DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-row justify-end gap-2">
-            <DialogClose
-              render={<Button variant="ghost">{t("action.cancel")}</Button>}
+          <div className="space-y-2">
+            <Label htmlFor="delete-event-confirmation">
+              {t("settings.deleteConfirm")}
+            </Label>
+            <Input
+              id="delete-event-confirmation"
+              value={deleteConfirmation}
+              onChange={(event) => setDeleteConfirmation(event.target.value)}
+              placeholder={DELETE_CONFIRMATION}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              autoFocus
+              disabled={deleting}
+              className="font-mono"
             />
+          </div>
+          <DialogFooter className="flex-row justify-end gap-2">
+            <Button
+              variant="ghost"
+              disabled={deleting}
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              {t("action.cancel")}
+            </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                setConfirmDelete(false)
-                toast.error(t("settings.deleteDisabled"))
+              disabled={deleting || deleteConfirmation !== DELETE_CONFIRMATION}
+              onClick={async () => {
+                if (deleting || deleteConfirmation !== DELETE_CONFIRMATION) return
+                setDeleting(true)
+                try {
+                  await removeEvent(event.id)
+                  setDeleteConfirmation("")
+                  setConfirmDelete(false)
+                  toast.success("Event deleted")
+                  router.replace("/events")
+                } catch {
+                  setDeleting(false)
+                  toast.error("Could not delete the event. Please try again.")
+                }
               }}
             >
-              <Trash2 />
-              {t("action.delete")}
+              {deleting ? <BrandSpinner /> : <Trash2 />}
+              {deleting ? "Deleting…" : t("action.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

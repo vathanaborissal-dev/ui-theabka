@@ -7,6 +7,7 @@ import { InvitationCountdown } from "../sections/countdown"
 import { InvitationSchedule } from "../sections/schedule"
 import { InvitationVenue } from "../sections/venue"
 import { InvitationRsvpForm } from "../sections/rsvp-form"
+import { GuestHonour } from "../sections/guest-honour"
 import {
   AddToCalendar,
   ContactList,
@@ -87,7 +88,7 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
       <div className="min-w-0">
         {design.coverPhoto || event.coverPhoto ? (
           <FramedPhoto
-            src={design.coverPhoto ?? event.coverPhoto}
+            src={design.coverPhoto}
             alt=""
             seed={2}
             frame={design.photoFrame ?? "none"}
@@ -96,7 +97,9 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
           />
         ) : null}
 
-        <InvSection align="left">
+        <InvSection align="left" section="letter">
+          {/* Ranged left with the rest of this card's type, not centred. */}
+          <GuestHonour guestName={guestName} variant="plain" className="mx-0 mb-6 text-left" />
           <p className="text-lg leading-relaxed text-(--inv-muted) @xl:text-xl">
             {L(design.greeting)}
           </p>
@@ -111,7 +114,7 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
         {design.showSchedule && event.schedule.length > 0 ? (
           <InvSection
             align="left"
-            title={t("public.scheduleTitle")}
+            title={t("public.scheduleTitle")} section="schedule"
             ornament="rule"
             className="border-y border-(--inv-border)"
           >
@@ -120,14 +123,14 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {design.showGallery && design.gallery.length > 0 ? (
-          <InvSection align="left" title={t("inv.gallery")} ornament="rule">
+          <InvSection align="left" title={t("inv.gallery")} section="gallery" ornament="rule">
             <GalleryStrip photos={design.gallery} />
           </InvSection>
         ) : null}
 
         <InvSection
           align="left"
-          title={t("public.venueTitle")}
+          title={t("public.venueTitle")} section="venue"
           ornament="rule"
           className="border-t border-(--inv-border)"
         >
@@ -135,7 +138,7 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (
-          <InvSection align="left" title={t("public.giftTitle")} ornament="rule">
+          <InvSection align="left" title={t("public.giftTitle")} section="gift" ornament="rule">
             <GiftNote note={design.giftNote} />
           </InvSection>
         ) : null}
@@ -144,7 +147,7 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
           <InvSection
             align="left"
             id="rsvp"
-            title={t("public.rsvpTitle")}
+            title={t("public.rsvpTitle")} section="rsvp"
             ornament="rule"
             className="border-t border-(--inv-border) bg-(--inv-surface)"
           >
@@ -153,7 +156,7 @@ export function ChanTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {event.contacts.length > 0 ? (
-          <InvSection align="left" title={t("public.contactHosts")} ornament="rule">
+          <InvSection align="left" title={t("public.contactHosts")} section="contacts" ornament="rule">
             <ContactList contacts={event.contacts} />
           </InvSection>
         ) : null}

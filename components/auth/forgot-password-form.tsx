@@ -3,10 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import { MailCheck } from "lucide-react"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AuthShell, NotConfiguredNotice } from "./auth-shell"
+import { AuthShell, FormNotice } from "./auth-shell"
 import { useLocale } from "@/components/providers/locale-provider"
 import { looksLikeEmail, requestPasswordReset } from "@/lib/auth"
 
@@ -44,7 +45,7 @@ export function ForgotPasswordForm() {
   const [error, setError] = React.useState<string>()
   const [pending, setPending] = React.useState(false)
   const [sent, setSent] = React.useState(false)
-  const [notConfigured, setNotConfigured] = React.useState(false)
+  const [formError, setFormError] = React.useState<string>()
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,8 +57,8 @@ export function ForgotPasswordForm() {
     setPending(true)
     const result = await requestPasswordReset({ email: email.trim() })
     setPending(false)
-    if (!result.ok && result.reason === "not-configured") {
-      setNotConfigured(true)
+    if (!result.ok) {
+      setFormError(result.message)
       return
     }
     // Always the same confirmation, whether or not the address is registered —
@@ -90,7 +91,7 @@ export function ForgotPasswordForm() {
   return (
     <AuthShell title={c.title} subtitle={c.subtitle} footer={backLink}>
       <form onSubmit={onSubmit} noValidate className="space-y-5">
-        {notConfigured ? <NotConfiguredNotice /> : null}
+        {formError ? <FormNotice message={formError} /> : null}
 
         <div className="space-y-1.5">
           <Label htmlFor="email">{c.email}</Label>
@@ -114,6 +115,7 @@ export function ForgotPasswordForm() {
         </div>
 
         <Button type="submit" size="lg" className="w-full" disabled={pending}>
+          {pending ? <BrandSpinner label="" /> : null}
           {pending ? c.submitting : c.submit}
         </Button>
       </form>

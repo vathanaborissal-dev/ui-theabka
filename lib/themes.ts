@@ -1,3 +1,5 @@
+import { DEFAULT_FONT, FONT_STORAGE_KEY } from "@/lib/app-fonts"
+
 /**
  * App themes. Each theme is a full visual personality — palette, display face,
  * corner radius and surface treatment — defined in `app/globals.css` under a
@@ -42,16 +44,22 @@ export const THEME_STORAGE_KEY = "theabka.theme"
 export const MODE_STORAGE_KEY = "theabka.mode"
 
 /**
- * Runs before first paint so the stored theme is applied without a flash.
- * Kept as a string because it must be inlined into <head>.
+ * Runs before first paint so the stored theme, mode and typeface are applied
+ * without a flash. Kept as a string because it must be inlined into <head>.
+ *
+ * The font matters here as much as the colours: applied a frame late, the
+ * whole page reflows as the metrics change, which is more jarring than a
+ * colour swap.
  */
 export const themeInitScript = `
 (function(){
   try {
     var t = localStorage.getItem('${THEME_STORAGE_KEY}') || '${DEFAULT_THEME}';
     var m = localStorage.getItem('${MODE_STORAGE_KEY}') || 'light';
+    var f = localStorage.getItem('${FONT_STORAGE_KEY}') || '${DEFAULT_FONT}';
     var el = document.documentElement;
     el.setAttribute('data-theme', t);
+    el.setAttribute('data-font', f);
     var dark = m === 'dark' || (m === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     el.classList.toggle('dark', dark);
     el.style.colorScheme = dark ? 'dark' : 'light';

@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import { useLocale } from "@/components/providers/locale-provider"
-import { useHasMounted, useReducedMotion } from "./motion"
+import { useReducedMotion } from "./motion"
 import { KbachDivider } from "./ornaments"
 import { Romduol } from "./khmer-ornaments"
 import { Motif } from "./motif"
 import { formatDate } from "@/lib/format"
 import { cn } from "@/lib/utils"
-import type { EventRecord } from "@/lib/types"
+import type { InvitationEvent } from "@/lib/types"
 
 type Phase = "sealed" | "opening" | "gone"
 
@@ -19,41 +19,45 @@ type Phase = "sealed" | "opening" | "gone"
  * the guest sees a sealed envelope addressed to them, taps the wax seal, the
  * flap folds back and the card slides out.
  *
- * It is an overlay, never a gate — the invitation is already rendered
- * underneath. If JavaScript fails, the guest simply sees the card. Guests who
- * prefer reduced motion skip it entirely, and it only shows once per session so
- * it does not become an obstacle on a second visit.
+ * When it is on it is a gate, not decoration: the page behind is locked from
+ * the first paint, so a guest cannot scroll past the seal to the card. It is
+ * shown on every visit — opening it *is* the invitation, and a refresh that
+ * skipped it dropped the guest wherever they had scrolled to before.
+ *
+ * What it must never be is a trap. Guests who prefer reduced motion, and any
+ * page where JavaScript never runs, get the card with no gate at all.
  */
 export function EnvelopeIntro({
   event,
   guestName,
   /** Changing this replays the intro — used by the builder's "replay" button. */
+  onCoverChange,
   replayKey = 0,
+  contained = false,
   enabled = true,
 }: {
-  event: EventRecord
+  event: InvitationEvent
   guestName?: string
+  /**
+   * Reports whether the envelope is covering the card, so the renderer can
+   * hold the card hidden and the page locked for exactly that long. Reported
+   * rather than assumed: only this component knows whether it is showing at
+   * all, and every case where it is not must leave the card visible.
+   */
+  onCoverChange?: (covered: boolean) => void
   replayKey?: number
+  /**
+   * Keeps the overlay inside the editor's phone frame.
+   *
+   * It is `fixed` on the public page, which is right there and wrong here: in
+   * the builder that covers the whole editor, so pressing Play buried the
+   * fields under a full-screen envelope.
+   */
+  contained?: boolean
   enabled?: boolean
 }) {
   const { t, L, locale } = useLocale()
   const reduced = useReducedMotion()
-  const storageKey = `theabka.opened.${event.slug}`
-
-  const mounted = useHasMounted()
-
-  // Read once, in a lazy initialiser rather than an effect: reading it on every
-  // render would hide the envelope the instant `open()` writes the flag, which
-  // would cut the exit animation short.
-  const [alreadySeen] = React.useState(() => {
-    if (typeof window === "undefined") return false
-    try {
-      return sessionStorage.getItem(storageKey) === "1"
-    } catch {
-      return false
-    }
-  })
-
   const [phase, setPhase] = React.useState<Phase>("sealed")
 
   // Replaying (from the builder) puts the envelope back together.
@@ -63,27 +67,46 @@ export function EnvelopeIntro({
     setPhase("sealed")
   }
 
-  const dismissed = alreadySeen && replayKey === 0
-  const visible = mounted && enabled && !reduced && !dismissed && phase !== "gone"
+  /*
+   * No `mounted` gate: this renders on the server too, so the envelope is in
+   * the first paint rather than dropping over an invitation the guest has
+   * already started reading.
+   */
+  const visible = enabled && !reduced && phase !== "gone"
 
-  // The page behind must not scroll while the envelope covers it.
+  /*
+   * Covering ends when the flap opens, not when the overlay leaves. The card
+   * behind then fades up during the 1.5s opening, ready just as the envelope
+   * begins to fade out at 800ms — holding the cover until the very end would
+   * reveal a blank ground and fade the card in after it.
+   */
+  const covering = visible && phase === "sealed"
+
   React.useEffect(() => {
-    if (!visible) return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = previous
-    }
-  }, [visible])
+    onCoverChange?.(covering)
+    return () => onCoverChange?.(false)
+  }, [covering, onCoverChange])
+
+  /*
+   * Sealed again on every load, and always from the top. See `video-envelope`:
+   * a refresh restores the old scroll position, so skipping the envelope left
+   * the guest halfway down the card instead of at its opening.
+   */
+  React.useEffect(() => {
+    if (!visible || contained) return
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual"
+    window.scrollTo(0, 0)
+  }, [visible, contained])
+
+  /*
+   * The scroll lock lives in the renderer, driven by `onCoverChange` above.
+   * As an effect here it could only lock the page after hydration — which is
+   * the window in which the card was scrollable in the first place.
+   */
 
   function open() {
     if (phase !== "sealed") return
     setPhase("opening")
-    try {
-      sessionStorage.setItem(storageKey, "1")
-    } catch {
-      /* private mode — the intro simply replays next time */
-    }
     window.setTimeout(() => setPhase("gone"), 1500)
   }
 
@@ -94,7 +117,16 @@ export function EnvelopeIntro({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-(--inv-bg) px-6",
+        // Pinned to the top of the card and given the pane's height, not the
+        // card's. It cannot be `fixed` here (that covers the whole editor) and
+        // it cannot be sticky either — as the last child in the flow, sticky
+        // would start four thousand pixels down, which is where it was landing.
+        contained
+          ? "absolute inset-x-0 top-0 h-[var(--inv-preview-height,38rem)]"
+          // A touch drag that starts on the seal must not scroll the page
+          // underneath — the lock CSS alone does not stop that on iOS.
+          : "fixed inset-0 touch-none",
+        "inv-envelope z-50 flex items-center justify-center bg-(--inv-bg) px-6 motion-reduce:hidden",
         opening && "pointer-events-none"
       )}
       style={

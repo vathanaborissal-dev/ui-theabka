@@ -1,0 +1,40 @@
+{
+  "$comment": "Provenance for every file in this folder. An invitation link is a public page, so only licensed or original music belongs here. Filenames must match `file` in lib/invitation/music.ts, or the track will not play.",
+  "tracks": [
+    {
+      "file": "pleng-kar.mp3",
+      "title": "Pleng Kar",
+      "source": "",
+      "license": "TO BE FILLED IN",
+      "author": ""
+    },
+    {
+      "file": "khmer-strings.mp3",
+      "title": "Khmer strings",
+      "source": "",
+      "license": "TO BE FILLED IN",
+      "author": ""
+    },
+    {
+      "file": "romvong.mp3",
+      "title": "Romvong",
+      "source": "",
+      "license": "TO BE FILLED IN",
+      "author": ""
+    },
+    {
+      "file": "piano-soft.mp3",
+      "title": "Soft piano",
+      "source": "",
+      "license": "TO BE FILLED IN",
+      "author": ""
+    },
+    {
+      "file": "acoustic-warm.mp3",
+      "title": "Warm acoustic",
+      "source": "",
+      "license": "TO BE FILLED IN",
+      "author": ""
+    }
+  ]
+}

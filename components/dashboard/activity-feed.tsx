@@ -27,7 +27,7 @@ export function ActivityFeed({ activity }: { activity: Activity[] }) {
 
       {items.length === 0 ? (
         <div className="p-5">
-          <EmptyState compact icon={Mail} title={t("dash.noActivity")} />
+          <EmptyState compact icon={Mail} mascotMotion="idle" title={t("dash.noActivity")} />
         </div>
       ) : (
         <ol className="p-5">

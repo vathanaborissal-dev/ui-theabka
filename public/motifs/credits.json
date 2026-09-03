@@ -118,6 +118,118 @@
       "author": "Seng Vutha",
       "purchasedOn": "",
       "status": "Extracted from the downloaded motif sheet, made transparent and tightly cropped. Registered for template use."
+    },
+    {
+      "file": "backgrounds/damask-ivory.jpg",
+      "source": "https://app.planessential.com (planessential.com template assets, DigitalOcean Spaces CDN) — /template/free/template-1/free-background.jpg",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the 'damask' backdrop."
+    },
+    {
+      "file": "plaques/name-frame-gold.png",
+      "source": "https://app.planessential.com (planessential.com template assets, DigitalOcean Spaces CDN) — /template/free/template-1/name-frame-kbach.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Same provenance as damask-ivory.jpg. NOT cleared for reuse. IN USE as the guest name plate."
+    },
+    {
+      "file": "plaques/button-gold.png",
+      "source": "https://app.planessential.com (planessential.com template assets, DigitalOcean Spaces CDN) — /template/pro/template-4/button-kbach.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Same provenance. NOT cleared for reuse. IN USE as the gold plaque button."
+    },
+    {
+      "file": "dividers/divider--kbach-underline.png",
+      "source": "https://app.planessential.com (planessential.com template assets, DigitalOcean Spaces CDN) — /template/free/template-1/underline-kbach-1.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Same provenance. NOT cleared for reuse. IN USE as a section flourish."
+    },
+    {
+      "file": "dividers/divider--kbach-underline-wide.png",
+      "source": "https://app.planessential.com (planessential.com template assets, DigitalOcean Spaces CDN) — /template/free/template-1/underline-kbach-2.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Same provenance. NOT cleared for reuse. IN USE as a wide section flourish."
+    },
+    {
+      "file": "videos/night-gold-bg.mp4",
+      "source": "https://app.planessential.com (planessential.com template-5 assets, DigitalOcean Spaces CDN) — /videos/template-5-bg.mp4",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the looping backdrop of the Reatrey template."
+    },
+    {
+      "file": "videos/night-gold-intro.mp4",
+      "source": "https://app.planessential.com (planessential.com template-5 assets, DigitalOcean Spaces CDN) — /videos/template-5-intro.mp4",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the envelope-opening intro."
+    },
+    {
+      "file": "plaques/name-frame-ivory.png",
+      "source": "https://app.planessential.com (planessential.com template-5 assets, DigitalOcean Spaces CDN) — event/template/assets/…btn-name-min.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the guest name plate on the Reatrey template."
+    },
+    {
+      "file": "frames/frame--scroll-gold.png",
+      "source": "https://app.planessential.com (planessential.com template-5 assets, DigitalOcean Spaces CDN) — event/template/assets/…frame.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the letter frame."
+    },
+    {
+      "file": "dividers/divider--kbach-silver.png",
+      "source": "https://app.planessential.com/decorations/underbar-kbach-silver.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as a section flourish."
+    },
+    {
+      "file": "plaques/name-frame-scroll-modern.png",
+      "source": "https://app.planessential.com (planessential.com template assets, DigitalOcean Spaces CDN) — /template/cover/…Modern_Frame_4_longer.png",
+      "license": "To be reviewed by project owner",
+      "author": "Plan Essential / Focuz Solution",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a competitor's template and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the 'Modern scroll' name plate."
+    },
+    {
+      "file": "videos/emerald-envelope-open.mp4",
+      "source": "https://ranuth-wedding.vercel.app (and storage.koompi.cloud/org_.../ranuth-wedding) — bdab861b-….mp4",
+      "license": "To be reviewed by project owner",
+      "author": "ranuth-wedding / allencode.dev",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a third-party wedding site and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the Marakot envelope-opening animation, played once on tap."
+    },
+    {
+      "file": "videos/emerald-mist-loop.mp4",
+      "source": "https://ranuth-wedding.vercel.app (and storage.koompi.cloud/org_.../ranuth-wedding) — d847c60f-….mp4",
+      "license": "To be reviewed by project owner",
+      "author": "ranuth-wedding / allencode.dev",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a third-party wedding site and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the Marakot looping backdrop, after the envelope opens."
+    },
+    {
+      "file": "plaques/name-frame-emerald.png",
+      "source": "https://ranuth-wedding.vercel.app (and storage.koompi.cloud/org_.../ranuth-wedding) — /guest-frame.png",
+      "license": "To be reviewed by project owner",
+      "author": "ranuth-wedding / allencode.dev",
+      "purchasedOn": "",
+      "status": "Supplied by the project owner from a third-party wedding site and used at their explicit direction. NOT cleared for reuse — replace before launch. IN USE as the 'Emerald cartouche' name plate."
     }
   ],
   "$status": "Processed 2026-08-26: source sheets were downloaded, useful motifs were isolated, their backgrounds were removed, and the resulting PNGs were tightly cropped. Existing untouched originals remain in motif-source-originals/; the new source sheets are in public/motifs/_originals/downloaded/."

@@ -2,13 +2,16 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PasswordField } from "./password-field"
-import { AuthShell, NotConfiguredNotice } from "./auth-shell"
+import { AuthShell, FormNotice } from "./auth-shell"
 import { useLocale } from "@/components/providers/locale-provider"
 import { looksLikeEmail, signIn } from "@/lib/auth"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/components/providers/auth-provider"
 
 const copy = {
   en: {
@@ -47,7 +50,14 @@ export function LoginForm() {
   const [password, setPassword] = React.useState("")
   const [errors, setErrors] = React.useState<{ email?: string; password?: string }>({})
   const [pending, setPending] = React.useState(false)
-  const [notConfigured, setNotConfigured] = React.useState(false)
+  const [formError, setFormError] = React.useState<string>()
+  const router = useRouter()
+  const { establishSession } = useAuth()
+
+  function destinationAfterSignIn() {
+    const requested = new URLSearchParams(window.location.search).get("next")
+    return requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/events"
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,9 +68,17 @@ export function LoginForm() {
     if (Object.keys(next).length > 0) return
 
     setPending(true)
+    setFormError(undefined)
     const result = await signIn({ email: email.trim(), password })
     setPending(false)
-    if (!result.ok && result.reason === "not-configured") setNotConfigured(true)
+
+    if (result.ok) {
+      establishSession(result.user)
+      router.replace(destinationAfterSignIn())
+      return
+    }
+    setErrors(result.fieldErrors ?? {})
+    setFormError(result.message)
   }
 
   return (
@@ -80,7 +98,7 @@ export function LoginForm() {
       }
     >
       <form onSubmit={onSubmit} noValidate className="space-y-5">
-        {notConfigured ? <NotConfiguredNotice /> : null}
+        {formError ? <FormNotice message={formError} /> : null}
 
         <div className="space-y-1.5">
           <Label htmlFor="email">{c.email}</Label>
@@ -123,6 +141,7 @@ export function LoginForm() {
         </div>
 
         <Button type="submit" size="lg" className="w-full" disabled={pending}>
+          {pending ? <BrandSpinner label="" /> : null}
           {pending ? c.submitting : c.submit}
         </Button>
       </form>

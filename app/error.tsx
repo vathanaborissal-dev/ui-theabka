@@ -1,8 +1,9 @@
 "use client"
 
-import { RotateCcw, TriangleAlert } from "lucide-react"
+import { RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
+import { MascotMotion } from "@/components/brand/mascot"
 
 export default function ErrorBoundary({
   error,
@@ -13,9 +14,9 @@ export default function ErrorBoundary({
 }) {
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-4 px-6 text-center">
-      <span className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-        <TriangleAlert className="size-5" aria-hidden="true" />
-      </span>
+      {/* A red warning triangle overstates this: nothing is lost and the fix
+          is one button away. Thiep working the problem says that better. */}
+      <MascotMotion motion="thinking" size={104} />
       <h1 className="display text-2xl">Something went wrong</h1>
       <p className="max-w-sm text-sm text-muted-foreground">
         This page could not be loaded. Your event data is safe — try again, or go back to your

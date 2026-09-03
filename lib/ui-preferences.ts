@@ -7,6 +7,15 @@ export const sidebarStore = createPersistedStore<"expanded" | "collapsed">(
   (value) => value === "expanded" || value === "collapsed"
 )
 
+export type EventsLayout = "cards" | "grid" | "list"
+
+/** How the account's event workspace is displayed, remembered across visits. */
+export const eventsLayoutStore = createPersistedStore<EventsLayout>(
+  "theabka.eventsLayout",
+  "cards",
+  (value) => value === "cards" || value === "grid" || value === "list"
+)
+
 /** Page sizes offered wherever a long list is paginated. */
 export const PAGE_SIZES = [10, 20, 50, 100] as const
 export type PageSize = (typeof PAGE_SIZES)[number]

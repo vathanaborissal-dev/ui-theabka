@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/shared/page-header"
 import { EmptyState } from "@/components/shared/empty-state"
 import { LoadMoreBar } from "@/components/shared/load-more"
 import { useLoadMore } from "@/components/shared/use-load-more"
-import { useData, useEventData } from "@/components/providers/data-provider"
+import { useData, useAllGuests, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatNumber, initials } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -25,7 +25,9 @@ import type { Guest } from "@/lib/types"
  * mistap at the door is someone being marked absent at their own wedding.
  */
 export function CheckInView({ eventId }: { eventId: string }) {
-  const { event, guests } = useEventData(eventId)
+  const { event } = useEventData(eventId)
+  // Loads every row on purpose — the door screen works through the whole list.
+  const { guests } = useAllGuests(event?.id)
   const { updateGuest } = useData()
   const { t, locale } = useLocale()
   const [query, setQuery] = React.useState("")
@@ -54,18 +56,18 @@ export function CheckInView({ eventId }: { eventId: string }) {
   if (!event) return null
 
   function markArrived(guest: Guest) {
-    updateGuest(guest.id, { attendance: "attended", attendedCount: guest.partySize })
+    updateGuest(guest.eventId, guest.id, { attendance: "attended", attendedCount: guest.partySize })
     toast.success(`${guest.name} — ${t("checkin.arrived")}`, {
       action: {
         label: t("action.undo"),
-        onClick: () => updateGuest(guest.id, { attendance: "unknown", attendedCount: undefined }),
+        onClick: () => updateGuest(guest.eventId, guest.id, { attendance: "unknown", attendedCount: undefined }),
       },
     })
   }
 
   function adjust(guest: Guest, delta: number) {
     const current = guest.attendedCount ?? guest.partySize
-    updateGuest(guest.id, { attendedCount: Math.max(1, current + delta) })
+    updateGuest(guest.eventId, guest.id, { attendedCount: Math.max(1, current + delta) })
   }
 
   return (
@@ -122,6 +124,7 @@ export function CheckInView({ eventId }: { eventId: string }) {
       {matches.length === 0 ? (
         <EmptyState
           icon={Search}
+          mascotMotion={guests.length === 0 ? "waving" : undefined}
           title={t("checkin.noMatch")}
           description={t("checkin.noMatchHelp")}
         />
@@ -155,6 +158,16 @@ export function CheckInView({ eventId }: { eventId: string }) {
 
                 {here ? (
                   <div className="flex items-center gap-1">
+                    {/*
+                      * The arrived row said nothing at all, while the row for a
+                      * guest still waiting carried a button labelled "Arrived".
+                      * The two states read backwards, which at a door means
+                      * skipping people who look done and re-checking people who
+                      * look pending. State on the left, controls on the right.
+                      */}
+                    <span className="mr-1 hidden text-xs font-medium text-success sm:inline">
+                      {t("checkin.isHere")}
+                    </span>
                     {/* Adjust only when the party that turned up differs. */}
                     <Button
                       variant="ghost"
@@ -180,7 +193,7 @@ export function CheckInView({ eventId }: { eventId: string }) {
                       variant="ghost"
                       size="icon-sm"
                       onClick={() =>
-                        updateGuest(guest.id, { attendance: "unknown", attendedCount: undefined })
+                        updateGuest(guest.eventId, guest.id, { attendance: "unknown", attendedCount: undefined })
                       }
                       aria-label={`${t("action.undo")} — ${guest.name}`}
                     >

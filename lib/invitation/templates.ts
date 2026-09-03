@@ -1,5 +1,6 @@
 import type {
   AmbientId,
+  BackdropId,
   CoverMotionId,
   EntranceId,
   EventType,
@@ -9,6 +10,9 @@ import type {
 } from "@/lib/types"
 
 export type TemplateId =
+  | "marakot"
+  | "sompeah"
+  | "chhaya"
   | "baisei"
   | "sbai"
   | "angkor"
@@ -35,10 +39,23 @@ export type InvitationTemplate = {
   defaultAmbient: AmbientId
   defaultCoverMotion: CoverMotionId
   defaultEnvelopeIntro: boolean
+  /** Fixed layer behind the card. Templates that want a flat card omit it. */
+  defaultBackdrop?: BackdropId
+  /**
+   * A filmed envelope-opening clip, played once when the guest taps.
+   *
+   * Templates with one get the video overlay; templates without keep the drawn
+   * envelope. Paired with `defaultBackdrop`'s loop so the clip ends on the same
+   * scene the card sits over.
+   */
+  envelopeVideo?: string
   /** Event types this template is offered for first. Empty means "all". */
   suitedTo: EventType[]
   /** Drives the picker's miniature preview. */
   preview:
+    | "scroll"
+    | "night-video"
+    | "emerald"
     | "arch"
     | "silk"
     | "temple"
@@ -55,6 +72,73 @@ export type InvitationTemplate = {
 }
 
 export const TEMPLATES: InvitationTemplate[] = [
+  {
+    id: "marakot",
+    name: { en: "Marakot", km: "មរកត" },
+    description: {
+      en: "Emerald and gold, every line in Khmer and English, with a month calendar.",
+      km: "មរកត និងមាស អក្សរខ្មែរនិងអង់គ្លេសទាំងពីរ ព្រមទាំងប្រតិទិនប្រចាំខែ។",
+    },
+    defaultPalette: "emerald-gold",
+    defaultFontPairingId: "moul",
+    defaultPattern: "none",
+    defaultOrnamentLevel: "rich",
+    defaultPhotoFrame: "rounded",
+    defaultGalleryLayout: "grid",
+    defaultEntrance: "rise",
+    defaultAmbient: "none",
+    defaultCoverMotion: "none",
+    defaultEnvelopeIntro: true,
+    defaultBackdrop: "video",
+    envelopeVideo: "/motifs/videos/emerald-envelope-open.mp4",
+    suitedTo: ["wedding", "engagement"],
+    preview: "emerald",
+    tag: { en: "Bilingual", km: "ពីរភាសា" },
+  },
+  {
+    id: "sompeah",
+    name: { en: "Sompeah", km: "សំពះ" },
+    description: {
+      en: "A full-screen photo cover that greets each guest by name, then one continuous scroll.",
+      km: "រូបគម្របពេញអេក្រង់ ស្វាគមន៍ភ្ញៀវម្នាក់ៗតាមឈ្មោះ រួចអូសបន្តជាបន្តបន្ទាប់។",
+    },
+    defaultPalette: "gold-ivory",
+    defaultFontPairingId: "moul",
+    defaultPattern: "phka",
+    defaultOrnamentLevel: "rich",
+    defaultPhotoFrame: "rounded",
+    defaultGalleryLayout: "grid",
+    defaultEntrance: "rise",
+    defaultAmbient: "none",
+    defaultCoverMotion: "none",
+    defaultEnvelopeIntro: false,
+    defaultBackdrop: "paper",
+    suitedTo: ["wedding", "engagement"],
+    preview: "scroll",
+    tag: { en: "Phone-first", km: "សម្រាប់ទូរស័ព្ទ" },
+  },
+  {
+    id: "chhaya",
+    name: { en: "Chhaya", km: "ឆាយា" },
+    description: {
+      en: "Gold type over a video that plays behind the whole invitation.",
+      km: "អក្សរមាសលើវីដេអូដែលលេងពីក្រោយធៀបទាំងមូល។",
+    },
+    defaultPalette: "on-video",
+    defaultFontPairingId: "moul",
+    defaultPattern: "none",
+    defaultOrnamentLevel: "rich",
+    defaultPhotoFrame: "rounded",
+    defaultGalleryLayout: "grid",
+    defaultEntrance: "fade",
+    defaultAmbient: "sparkle",
+    defaultCoverMotion: "none",
+    defaultEnvelopeIntro: true,
+    defaultBackdrop: "video",
+    suitedTo: ["wedding", "engagement"],
+    preview: "night-video",
+    tag: { en: "Video", km: "វីដេអូ" },
+  },
   {
     id: "kbach",
     name: { en: "Kbach", km: "ក្បាច់" },
@@ -146,7 +230,7 @@ export const TEMPLATES: InvitationTemplate[] = [
       en: "Temple silhouette, pediment arch and carved kbach borders.",
       km: "រូបប្រាសាទ ហោជាង និងក្បាច់ចម្លាក់។",
     },
-    defaultPalette: "sandstone",
+    defaultPalette: "on-video",
     defaultFontPairingId: "moul",
     defaultPattern: "temple",
     defaultOrnamentLevel: "rich",
@@ -209,7 +293,7 @@ export const TEMPLATES: InvitationTemplate[] = [
       en: "A cinematic night card with an arched portrait and naga ornament.",
       km: "ធៀបរាត្រីដ៏ឱឡារិក មានរូបក្របរាងក្លោង និងក្បាច់នាគ។",
     },
-    defaultPalette: "temple-night",
+    defaultPalette: "on-video",
     defaultFontPairingId: "classic",
     defaultPattern: "kbach",
     defaultOrnamentLevel: "subtle",

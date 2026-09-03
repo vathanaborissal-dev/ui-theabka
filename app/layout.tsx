@@ -2,10 +2,12 @@ import type { Metadata, Viewport } from "next"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CommandPaletteProvider } from "@/components/providers/command-palette-provider"
+import { AuthProvider } from "@/components/providers/auth-provider"
 import { DataProvider } from "@/components/providers/data-provider"
 import { LocaleProvider } from "@/components/providers/locale-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { DEFAULT_THEME, themeInitScript } from "@/lib/themes"
+import { DEFAULT_FONT, appFontCss } from "@/lib/app-fonts"
 import { fontVariables } from "@/lib/fonts"
 import "./globals.css"
 
@@ -30,20 +32,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-theme={DEFAULT_THEME}
+      data-font={DEFAULT_FONT}
       className={`${fontVariables} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
+        <style dangerouslySetInnerHTML={{ __html: appFontCss() }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="flex min-h-full flex-col">
         <ThemeProvider>
           <LocaleProvider>
-            <DataProvider>
+            <AuthProvider>
+              <DataProvider>
               <CommandPaletteProvider>
                 <TooltipProvider>{children}</TooltipProvider>
               </CommandPaletteProvider>
-            </DataProvider>
+              </DataProvider>
+            </AuthProvider>
             <Toaster position="top-center" />
           </LocaleProvider>
         </ThemeProvider>

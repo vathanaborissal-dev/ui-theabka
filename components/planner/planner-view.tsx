@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { ListChecks, Plus, Trash2 } from "lucide-react"
+import { toast } from "sonner"
+import {ListChecks, Plus, Sparkles, Trash2} from "lucide-react"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DatePicker } from "@/components/ui/date-picker"
@@ -15,7 +17,7 @@ import {
 } from "@/components/ui/select"
 import { PageHeader } from "@/components/shared/page-header"
 import { EmptyState } from "@/components/shared/empty-state"
-import { useData, useEventData } from "@/components/providers/data-provider"
+import { useData, useBudget, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { daysUntil, formatDate, formatNumber } from "@/lib/format"
 import { taskStats } from "@/lib/stats"
@@ -46,7 +48,10 @@ type Bucket = "overdue" | "week" | "later" | "done"
 
 export function PlannerView({ eventId }: { eventId: string }) {
   const { event, tasks } = useEventData(eventId)
-  const { addTask, updateTask, removeTask } = useData()
+  // Loaded on view — the checklist is read whole, grouped by category.
+  useBudget(event?.id)
+  const { addTask, updateTask, removeTask, startChecklist } = useData()
+  const [starting, setStarting] = React.useState(false)
   const { t, L, locale } = useLocale()
 
   const [draft, setDraft] = React.useState("")
@@ -76,14 +81,12 @@ export function PlannerView({ eventId }: { eventId: string }) {
     e.preventDefault()
     const title = draft.trim()
     if (!title || !event) return
-    addTask({
-      id: `tk_${Date.now()}`,
-      eventId: event.id,
+    void addTask(event.id, {
       title: { en: title, km: title },
       category: draftCategory,
       dueDate: draftDate || undefined,
       done: false,
-    })
+    }).catch(() => toast.error("That task could not be added. Please try again."))
     setDraft("")
     setDraftDate("")
   }
@@ -170,8 +173,29 @@ export function PlannerView({ eventId }: { eventId: string }) {
       {tasks.length === 0 ? (
         <EmptyState
           icon={ListChecks}
+          mascotMotion="waving"
           title={t("planner.empty.title")}
           description={t("planner.empty.body")}
+          action={
+            /* The event already tells us which starter is useful. Keep this a
+               single confident action instead of asking the host to choose a
+               template they already chose when the event was created. */
+            <Button
+              variant="outline"
+              className="h-auto min-h-9 max-w-full whitespace-normal py-2 text-center sm:whitespace-nowrap"
+              disabled={starting}
+              onClick={() => {
+                setStarting(true)
+                void startChecklist(event.id)
+                  .then((n) => toast.success(t("planner.starterAdded").replace("{n}", String(n))))
+                  .catch(() => toast.error(t("planner.starterFailed")))
+                  .finally(() => setStarting(false))
+              }}
+            >
+              {starting ? <BrandSpinner /> : <Sparkles />}
+              {t(`planner.useStarter.${event.type}`)}
+            </Button>
+          }
         />
       ) : (
         <div className="space-y-5">
@@ -240,7 +264,7 @@ export function PlannerView({ eventId }: { eventId: string }) {
                           size="icon-sm"
                           className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                           onClick={() => removeTask(task.id)}
-                          aria-label={`${t("action.delete")} — ${L(task.title)}`}
+                          aria-label={`${t("action.delete")} - ${L(task.title)}`}
                         >
                           <Trash2 />
                         </Button>

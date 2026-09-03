@@ -60,11 +60,14 @@ export function GuestFormSheet({
     setErrors({})
   }
 
+  const [saving, setSaving] = React.useState(false)
+
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (saving) return
     const nextErrors: Record<string, string> = {}
     if (!form.name.trim()) nextErrors.name = "Please enter a name"
     const seats = Number(form.partySize)
@@ -85,20 +88,22 @@ export function GuestFormSheet({
       notes: form.notes.trim() || undefined,
     }
 
-    if (editing && guest) {
-      updateGuest(guest.id, payload)
-      toast.success(`${payload.name} updated`)
-    } else {
-      addGuest({
-        ...payload,
-        id: `g_${Date.now()}`,
-        eventId: event.id,
-        attendance: "unknown",
-        invitedAt: new Date().toISOString(),
-      })
-      toast.success(`${payload.name} added to the guest list`)
+    // The id, token and timestamps are the server's to assign.
+    setSaving(true)
+    try {
+      if (editing && guest) {
+        await updateGuest(event.id, guest.id, payload)
+        toast.success(`${payload.name} updated`)
+      } else {
+        await addGuest(event.id, payload)
+        toast.success(`${payload.name} added to the guest list`)
+      }
+      onOpenChange(false)
+    } catch {
+      toast.error("That could not be saved. Please try again.")
+    } finally {
+      setSaving(false)
     }
-    onOpenChange(false)
   }
 
   return (

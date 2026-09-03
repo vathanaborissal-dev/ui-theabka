@@ -6,6 +6,11 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import type { LocalizedText } from "@/lib/types"
+import type { InvSectionId } from "@/components/invitation/sections/common"
+import {
+  usePreviewFocus,
+  useSectionFocus,
+} from "@/components/invitation/builder/preview-focus"
 
 /**
  * One field, two languages. A small EN/ខ្មែរ switch beats two stacked inputs:
@@ -20,6 +25,7 @@ export function BilingualField({
   multiline,
   rows = 3,
   placeholder,
+  section,
 }: {
   label: string
   id: string
@@ -28,12 +34,16 @@ export function BilingualField({
   multiline?: boolean
   rows?: number
   placeholder?: { en: string; km: string }
+  /** Which part of the card this writes to, so the preview can follow. */
+  section?: InvSectionId
 }) {
   const [lang, setLang] = React.useState<"en" | "km">("en")
   const Control = multiline ? Textarea : Input
+  const preview = usePreviewFocus()
+  const focusProps = useSectionFocus(section)
 
   return (
-    <div className="space-y-1.5">
+    <div className="mx-1 space-y-1.5" {...focusProps}>
       <div className="flex items-center justify-between gap-2">
         <Label htmlFor={`${id}-${lang}`}>{label}</Label>
         <div
@@ -45,7 +55,14 @@ export function BilingualField({
             <button
               key={code}
               type="button"
-              onClick={() => setLang(code)}
+              onClick={() => {
+                setLang(code)
+                // Typing in Khmer is how you check the Khmer reads, so the
+                // preview follows the field rather than making you switch it
+                // separately every time.
+                preview?.showLocale(code)
+                if (section) preview?.focus(section)
+              }}
               aria-pressed={lang === code}
               lang={code}
               className={cn(
@@ -77,7 +94,7 @@ export function BilingualField({
         onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
           onChange({ ...value, [lang]: e.target.value })
         }
-        className={lang === "km" ? "lang-km" : undefined}
+        className={cn("scroll-mt-12 scroll-mb-4", lang === "km" && "lang-km")}
       />
     </div>
   )

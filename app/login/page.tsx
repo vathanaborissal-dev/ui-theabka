@@ -1,8 +1,13 @@
 import type { Metadata } from "next"
 import { LoginForm } from "@/components/auth/login-form"
+import { GuestGuard } from "@/components/auth/guest-guard"
 
 export const metadata: Metadata = { title: "Sign in" }
 
 export default function LoginPage() {
-  return <LoginForm />
+  return (
+    <GuestGuard>
+      <LoginForm />
+    </GuestGuard>
+  )
 }

@@ -42,6 +42,7 @@ export function NextUpPanel({ event, tasks }: { event: EventRecord; tasks: Task[
           <EmptyState
             compact
             icon={ListChecks}
+            mascotMotion="idle"
             title={t("planner.empty.title")}
             description={t("planner.empty.body")}
           />

@@ -64,10 +64,16 @@ export function RecordGiftDialog({
     if (!guest) return
     const value = Number(amount)
     if (!Number.isFinite(value) || value <= 0) return
-    updateGuest(guest.id, {
+    const recorded = guest
+    void updateGuest(recorded.eventId, recorded.id, {
       gift: { amount: value, currency, method, note: note.trim() || undefined },
     })
-    toast.success(`${formatMoney(value, currency, locale)} recorded from ${guest.name}`)
+      .then(() =>
+        toast.success(
+          `${formatMoney(value, currency, locale)} recorded from ${recorded.name}`
+        )
+      )
+      .catch(() => toast.error("That gift could not be saved. Please try again."))
     onOpenChange(false)
   }
 

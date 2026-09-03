@@ -10,6 +10,7 @@ import { InvitationCountdown } from "../sections/countdown"
 import { InvitationSchedule } from "../sections/schedule"
 import { InvitationVenue } from "../sections/venue"
 import { InvitationRsvpForm } from "../sections/rsvp-form"
+import { GuestHonour } from "../sections/guest-honour"
 import {
   AddToCalendar,
   ContactList,
@@ -36,7 +37,7 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
 
   return (
     <article data-inv-template="naga" className="relative bg-(--inv-bg) text-(--inv-fg)">
-      <header className="relative min-h-[100dvh] overflow-hidden px-5 py-8 @xl:px-8 @2xl:grid @2xl:grid-cols-[1.08fr_0.92fr] @2xl:items-center @2xl:gap-10 @2xl:py-12">
+      <header className="relative min-h-[var(--inv-preview-height,100dvh)] overflow-hidden px-5 py-8 @xl:px-8 @2xl:grid @2xl:grid-cols-[1.08fr_0.92fr] @2xl:items-center @2xl:gap-10 @2xl:py-12">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,color-mix(in_oklch,var(--inv-gold)_12%,transparent),transparent_34%)]"
@@ -45,7 +46,7 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
         <div className="relative flex items-center justify-center">
           <div className="relative h-[49dvh] min-h-72 w-full max-w-md overflow-hidden rounded-t-[999px] border border-(--inv-gold)/55 @2xl:h-[78dvh] @2xl:max-w-lg">
             <Photo
-              src={design.coverPhoto ?? event.coverPhoto}
+              src={design.coverPhoto}
               alt=""
               seed={4}
               rounded={false}
@@ -112,10 +113,11 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         <div className="relative">
-          <InvSection>
+          <InvSection section="letter">
             <div className="mx-auto max-w-md rounded-lg border border-(--inv-gold)/30 bg-(--inv-surface)/85 p-8 text-center">
               <Romduol className="mx-auto size-7 text-(--inv-gold)" />
-              <p className="mt-4 text-sm leading-relaxed text-(--inv-muted)">
+              <GuestHonour guestName={guestName} variant="plain" className="mt-5" />
+              <p className="mt-6 text-sm leading-relaxed text-(--inv-muted)">
                 {L(design.greeting)}
               </p>
               <p className="mt-4 text-base leading-loose text-(--inv-fg)">{L(design.message)}</p>
@@ -129,7 +131,7 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
           </InvSection>
 
           {design.showSchedule && event.schedule.length > 0 ? (
-            <InvSection title={t("public.scheduleTitle")} ornament={orn.sectionOrnament}>
+            <InvSection title={t("public.scheduleTitle")} section="schedule" ornament={orn.sectionOrnament}>
               <div className="mx-auto max-w-lg rounded-lg border border-(--inv-gold)/25 bg-(--inv-surface)/85 p-6 @xl:p-8">
                 <InvitationSchedule items={event.schedule} variant="line" />
               </div>
@@ -137,29 +139,29 @@ export function NagaTemplate({ event, guestName }: TemplateProps) {
           ) : null}
 
           {design.showGallery && design.gallery.length > 0 ? (
-            <InvSection title={t("inv.gallery")} ornament={orn.sectionOrnament}>
+            <InvSection title={t("inv.gallery")} section="gallery" ornament={orn.sectionOrnament}>
               <GalleryStrip photos={design.gallery} />
             </InvSection>
           ) : null}
 
-          <InvSection title={t("public.venueTitle")} ornament={orn.sectionOrnament}>
+          <InvSection title={t("public.venueTitle")} section="venue" ornament={orn.sectionOrnament}>
             <InvitationVenue variant="split" venue={event.venue} showMap={design.showMap} />
           </InvSection>
 
           {design.showGiftInfo && design.giftNote ? (
-            <InvSection title={t("public.giftTitle")} ornament={orn.sectionOrnament}>
+            <InvSection title={t("public.giftTitle")} section="gift" ornament={orn.sectionOrnament}>
               <GiftNote note={design.giftNote} />
             </InvSection>
           ) : null}
 
           {design.showRsvp ? (
-            <InvSection id="rsvp" title={t("public.rsvpTitle")} ornament={orn.sectionOrnament}>
+            <InvSection id="rsvp" title={t("public.rsvpTitle")} section="rsvp" ornament={orn.sectionOrnament}>
               <InvitationRsvpForm event={event} guestName={guestName} />
             </InvSection>
           ) : null}
 
           {event.contacts.length > 0 ? (
-            <InvSection title={t("public.contactHosts")} ornament="rule">
+            <InvSection title={t("public.contactHosts")} section="contacts" ornament="rule">
               <ContactList contacts={event.contacts} />
             </InvSection>
           ) : null}

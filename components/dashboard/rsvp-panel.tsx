@@ -2,16 +2,32 @@
 
 import { ArrowRight } from "lucide-react"
 import { ButtonLink } from "@/components/ui/button-link"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { SegmentedBar } from "@/components/shared/segmented-bar"
 import { AreaTrend, type TrendPoint } from "@/components/charts/area-trend"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatDate, formatNumber } from "@/lib/format"
-import { guestStats } from "@/lib/stats"
-import type { EventRecord, Guest } from "@/lib/types"
+import type { GuestSummary } from "@/lib/guests"
+import type { EventRecord } from "@/lib/types"
 
-export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest[] }) {
+export function RsvpPanel({
+  event,
+  summary,
+  trend,
+}: {
+  event: EventRecord
+  summary: GuestSummary
+  /** Replies per day, already bucketed by the API. */
+  trend: {
+    points: TrendPoint[]
+    status: "loading" | "ready" | "failed"
+    retry: () => void
+  }
+}) {
   const { t, L, locale } = useLocale()
-  const stats = guestStats(guests)
+  // Every figure here is a count, and counts come from the database.
+  const stats = summary
 
   const segments = [
     { key: "confirmed", label: t("status.confirmed"), value: stats.confirmed, className: "bg-success" },
@@ -20,7 +36,6 @@ export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest
     { key: "pending", label: t("status.pending"), value: stats.pending, className: "bg-muted-foreground/15" },
   ]
 
-  const trend = responseTrend(guests)
 
   return (
     <section className="rounded-[var(--card-radius)] border border-[var(--card-border-color)] bg-card shadow-(--shadow-card)">
@@ -28,7 +43,7 @@ export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest
         <div>
           <h2 className="display text-base">{t("dash.rsvpProgress")}</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            {formatNumber(Math.round(stats.responseRate * 100), locale)}% {t("dash.responseRate")}
+            {formatNumber(Math.round(((stats.confirmed + stats.declined + stats.maybe) / (stats.invited || 1)) * 100), locale)}% {t("dash.responseRate")}
             {" · "}
             {formatNumber(stats.pending, locale)} {t("status.pending").toLowerCase()}
           </p>
@@ -40,15 +55,15 @@ export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest
       </header>
 
       <div className="space-y-6 p-5">
-        <SegmentedBar segments={segments} total={stats.invitations} />
+        <SegmentedBar segments={segments} total={stats.invited} />
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <p className="eyebrow mb-3 text-muted-foreground">{t("side.label")}</p>
             <dl className="space-y-2.5">
               {(["a", "b", "shared"] as const).map((side) => {
-                const s = stats.bySide[side]
-                if (s.invitations === 0) return null
+                const s = stats.bySide.find((total) => total.side === side)
+                if (!s || s.invitations === 0) return null
                 const label =
                   side === "shared" ? t("side.shared") : L(event.sides[side])
                 const pct = s.invitations ? (s.confirmed / s.invitations) * 100 : 0
@@ -77,37 +92,37 @@ export function RsvpPanel({ event, guests }: { event: EventRecord; guests: Guest
 
           <div>
             <p className="eyebrow mb-3 text-muted-foreground">{t("gifts.trend")}</p>
-            <AreaTrend
-              points={trend}
-              caption="Cumulative replies received per day"
-              formatLabel={(label) => formatDate(label, locale, "dayMonth")}
-              formatValue={(value) =>
-                `${formatNumber(value, locale)} ${t("dash.repliesSoFar").toLowerCase()}`
-              }
-            />
+            {trend.status === "loading" ? (
+              <div className="flex h-[168px] items-end gap-3 px-8 pb-6" role="status" aria-label={t("common.loading")}>
+                {[35, 58, 44, 76, 62, 88].map((height, index) => (
+                  <Skeleton key={index} className="flex-1" style={{ height: `${height}%` }} />
+                ))}
+              </div>
+            ) : trend.status === "failed" ? (
+              <div className="flex h-[168px] flex-col items-center justify-center gap-3 text-center">
+                <p className="text-sm text-muted-foreground">{t("dash.repliesLoadFailed")}</p>
+                <Button type="button" variant="outline" size="sm" onClick={trend.retry}>
+                  {t("action.tryAgain")}
+                </Button>
+              </div>
+            ) : (
+              <AreaTrend
+                points={trend.points}
+                caption="Cumulative replies received per day"
+                emptyLabel={t("dash.noRepliesYet")}
+                formatLabel={(label) => formatDate(label, locale, "dayMonth")}
+                formatValue={(value) =>
+                  `${formatNumber(value, locale)} ${t("dash.repliesSoFar").toLowerCase()}`
+                }
+              />
+            )}
             <p className="mt-2 text-xs text-muted-foreground">
               {formatNumber(stats.confirmed + stats.declined + stats.maybe, locale)}{" "}
-              {t("common.of")} {formatNumber(stats.invitations, locale)} {t("guests.parties").toLowerCase()}
+              {t("common.of")} {formatNumber(stats.invited, locale)} {t("guests.parties").toLowerCase()}
             </p>
           </div>
         </div>
       </div>
     </section>
   )
-}
-
-/** Cumulative replies bucketed by day, for the trend line. */
-function responseTrend(guests: Guest[]): TrendPoint[] {
-  const byDay = new Map<string, number>()
-  for (const g of guests) {
-    if (!g.respondedAt) continue
-    const day = g.respondedAt.slice(0, 10)
-    byDay.set(day, (byDay.get(day) ?? 0) + 1)
-  }
-  const days = [...byDay.keys()].sort()
-  let running = 0
-  return days.map((day) => {
-    running += byDay.get(day) ?? 0
-    return { label: day, value: running }
-  })
 }

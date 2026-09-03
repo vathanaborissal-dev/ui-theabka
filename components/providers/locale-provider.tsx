@@ -28,20 +28,52 @@ const LocaleContext = React.createContext<LocaleContextValue | null>(null)
  * `persist: false` gives a subtree its own language that is not written to
  * storage — the public invitation uses it so a guest switching to Khmer does
  * not change the language of the couple's dashboard.
+ *
+ * Passing `locale` makes it controlled, for when something outside the subtree
+ * owns the choice: the builder's preview is switched from a toggle in the
+ * editor chrome, which sits above the provider and so cannot reach into it.
  */
 export function LocaleProvider({
   children,
   initialLocale = "en",
+  locale,
   persist = true,
 }: {
   children: React.ReactNode
   initialLocale?: Locale
+  /** Controlled language. Overrides `persist` and `initialLocale`. */
+  locale?: Locale
   persist?: boolean
 }) {
+  if (locale) {
+    return <ControlledLocaleProvider locale={locale}>{children}</ControlledLocaleProvider>
+  }
   return persist ? (
     <PersistedLocaleProvider>{children}</PersistedLocaleProvider>
   ) : (
     <LocalLocaleProvider initialLocale={initialLocale}>{children}</LocalLocaleProvider>
+  )
+}
+
+/**
+ * Language owned by the caller.
+ *
+ * `setLocale` is a no-op rather than local state: something above is already
+ * the source of truth, and letting a child set a competing value here would
+ * make the toggle and the preview disagree about which language is showing.
+ */
+function ControlledLocaleProvider({
+  children,
+  locale,
+}: {
+  children: React.ReactNode
+  locale: Locale
+}) {
+  const noop = React.useCallback(() => {}, [])
+  return (
+    <LocaleContext.Provider value={useLocaleValue(locale, noop)}>
+      {children}
+    </LocaleContext.Provider>
   )
 }
 

@@ -1,15 +1,13 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import Link, { useLinkStatus } from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  ExternalLink,
+import {ExternalLink,
   Menu,
   MoreHorizontal,
   PanelLeftClose,
-  PanelLeftOpen,
-} from "lucide-react"
+  PanelLeftOpen} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -21,6 +19,7 @@ import { SearchTrigger } from "./search-trigger"
 import { sidebarStore } from "@/lib/ui-preferences"
 import { EventSwitcher } from "./event-switcher"
 import { ProfileMenu } from "./profile-menu"
+import { WhatsNewCard } from "./whats-new-card"
 import { LanguageToggle, ThemeMenu } from "./appearance-menu"
 import { CommandPalette } from "./command-palette"
 import { allEventNavItems, eventFooterNav, eventHref, eventNav } from "@/lib/nav"
@@ -72,7 +71,7 @@ export function AppShell({
   )
 }
 
-function useSidebarCollapsed() {
+export function useSidebarCollapsed() {
   return (
     React.useSyncExternalStore(
       sidebarStore.subscribe,
@@ -83,7 +82,7 @@ function useSidebarCollapsed() {
 }
 
 /** ⌘B / Ctrl+B is the convention for this, and costs nothing to support. */
-function useSidebarShortcut() {
+export function useSidebarShortcut() {
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "b") {
@@ -98,7 +97,7 @@ function useSidebarShortcut() {
   }, [])
 }
 
-function useIsActive() {
+export function useIsActive() {
   const pathname = usePathname()
   return React.useCallback(
     (href: string, exact: boolean) =>
@@ -120,7 +119,55 @@ function useSectionLabel(eventId: string) {
   return t(match?.labelKey ?? "nav.dashboard")
 }
 
-function NavLink({
+/**
+ * The icon, which becomes a spinner while its own link is navigating.
+ *
+ * Separate component because `useLinkStatus` only reports the pending state of
+ * the `Link` it sits inside — read from the parent it would say nothing. It
+ * marks *which* item was clicked, which the route-level skeleton cannot: that
+ * tells you something is loading, not where you are going.
+ */
+function NavLinkIcon({
+  Icon,
+  active,
+}: {
+  Icon: React.ComponentType<{ className?: string }>
+  active: boolean
+}) {
+  const { pending } = useLinkStatus()
+
+  if (pending) {
+    return (
+      <span
+        className="inline-flex size-4 shrink-0 items-center justify-center gap-px text-primary"
+        role="status"
+        aria-label="Loading"
+      >
+        {[0, 1, 2].map((index) => (
+          <span
+            key={index}
+            aria-hidden="true"
+            className="size-0.5 rounded-full bg-current"
+            style={{
+              animation: "brand-blink 1.15s ease-in-out infinite",
+              animationDelay: `${index * 0.14}s`,
+            }}
+          />
+        ))}
+      </span>
+    )
+  }
+  return (
+    <Icon
+      className={cn(
+        "size-4 shrink-0 transition-colors",
+        active ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground"
+      )}
+    />
+  )
+}
+
+export function NavLink({
   href,
   exact,
   icon: Icon,
@@ -152,12 +199,7 @@ function NavLink({
           : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
       )}
     >
-      <Icon
-        className={cn(
-          "size-4 shrink-0 transition-colors",
-          active ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground"
-        )}
-      />
+      <NavLinkIcon Icon={Icon} active={active} />
       {collapsed ? null : <span className="truncate">{label}</span>}
     </Link>
   )
@@ -271,6 +313,15 @@ function DesktopSidebar({ event }: { event: EventRecord }) {
         </div>
       </div>
 
+      <div
+        className={cn(
+          "shrink-0 border-t border-sidebar-border py-3",
+          collapsed ? "flex justify-center px-2" : "px-3"
+        )}
+      >
+        <WhatsNewCard collapsed={collapsed} />
+      </div>
+
       {/* The signed-in planner, and the preferences that hang off them. */}
       <div
         className={cn(
@@ -285,7 +336,7 @@ function DesktopSidebar({ event }: { event: EventRecord }) {
 }
 
 /** Collapses and expands the sidebar. Sits in the top bar so it stays put. */
-function SidebarToggle() {
+export function SidebarToggle() {
   const { t } = useLocale()
   const collapsed = useSidebarCollapsed()
   const label = t(collapsed ? "sidebar.expand" : "sidebar.collapse")
@@ -403,6 +454,9 @@ function MobileNavSheet({ event }: { event: EventRecord }) {
               />
             ))}
           </div>
+        </div>
+        <div className="shrink-0 border-t border-border px-3 py-3">
+          <WhatsNewCard />
         </div>
         <div className="shrink-0 border-t border-border p-2">
           <ProfileMenu />

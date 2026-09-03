@@ -11,9 +11,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
 import { useTheme } from "@/components/providers/theme-provider"
 import { APP_THEMES, type ThemeMode } from "@/lib/themes"
+import {
+  APP_FONTS,
+  FONT_CATEGORY_LABELS,
+  type AppFont,
+  type AppFontCategory,
+  type AppFontId,
+} from "@/lib/app-fonts"
 import { cn } from "@/lib/utils"
 
 const modeIcons: Record<ThemeMode, typeof Sun> = {
@@ -65,6 +81,14 @@ export function ThemeMenuItems() {
 
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
+        <DropdownMenuLabel>Typeface</DropdownMenuLabel>
+        <div className="p-1 pt-0">
+          <FontSelect />
+        </div>
+      </DropdownMenuGroup>
+
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
         <DropdownMenuLabel>{t("common.appearance")}</DropdownMenuLabel>
         <div className="flex gap-1 p-1">
           {(["light", "dark", "system"] as ThemeMode[]).map((m) => {
@@ -91,6 +115,64 @@ export function ThemeMenuItems() {
         </div>
       </DropdownMenuGroup>
     </>
+  )
+}
+
+/**
+ * The face the interface is set in.
+ *
+ * A select rather than a menu: two dozen options is a list to scan and pick
+ * from, not a set of commands, and a select gives the keyboard behaviour
+ * (type-ahead, a scrolling listbox, the current value shown on the trigger)
+ * that a stack of menu items would have to imitate badly.
+ *
+ * Every row is drawn in the font it selects, because a list of names tells
+ * you nothing about what you are choosing — seeing the difference is the
+ * whole point of the control.
+ */
+export function FontSelect({ className }: { className?: string }) {
+  const { font, setFont } = useTheme()
+
+  const groups = APP_FONTS.reduce<Record<string, AppFont[]>>((acc, item) => {
+    ;(acc[item.category] ??= []).push(item)
+    return acc
+  }, {})
+
+  return (
+    <Select
+      value={font}
+      onValueChange={(value) => {
+        if (value) setFont(value as AppFontId)
+      }}
+      items={APP_FONTS.map((item) => ({ value: item.id, label: item.name }))}
+    >
+      <SelectTrigger size="sm" aria-label="Typeface" className={cn("w-full", className)}>
+        <SelectValue />
+      </SelectTrigger>
+      {/* Anchored to the trigger rather than to the selected item: the list is
+          long enough to be scrolled, and aligning it to the current choice
+          would drop it over the menu it was opened from. */}
+      <SelectContent alignItemWithTrigger={false} align="start" className="max-h-72">
+        {(Object.keys(groups) as AppFontCategory[]).map((category) => (
+          <SelectGroup key={category}>
+            <SelectLabel>{FONT_CATEGORY_LABELS[category]}</SelectLabel>
+            {groups[category].map((item) => (
+              <SelectItem
+                key={item.id}
+                value={item.id}
+                // The serif options change headings only, so previewing them
+                // in the display stack is what the reader will actually get.
+                style={{
+                  fontFamily: item.category === "serif" ? item.display : (item.ui ?? undefined),
+                }}
+              >
+                {item.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 

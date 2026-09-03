@@ -54,15 +54,20 @@ export function AreaTrend({
   className,
   height = 168,
   caption,
+  color = "var(--primary)",
   formatLabel = (label) => label,
   formatValue = (value) => String(value),
+  emptyLabel = "No activity yet",
 }: {
   points: TrendPoint[]
   className?: string
   height?: number
   caption: string
+  /** A CSS color, for telling two of these apart when they sit side by side. */
+  color?: string
   formatLabel?: (label: string) => string
   formatValue?: (value: number) => string
+  emptyLabel?: string
 }) {
   const gradientId = React.useId()
   const [containerRef, width] = useMeasuredWidth()
@@ -81,13 +86,16 @@ export function AreaTrend({
   // Straight segments, not a spline: the series is a cumulative count, and
   // smoothing would invent values between the days that were actually recorded.
   const line = points.map((p, i) => `${i === 0 ? "M" : "L"} ${x(i)} ${y(p.value)}`).join(" ")
-  const area = `${line} L ${x(points.length - 1)} ${MARGIN.top + plotHeight} L ${x(0)} ${
-    MARGIN.top + plotHeight
-  } Z`
+  const area = points.length >= 2
+    ? `${line} L ${x(points.length - 1)} ${MARGIN.top + plotHeight} L ${x(0)} ${
+        MARGIN.top + plotHeight
+      } Z`
+    : ""
 
   const lastIndex = points.length - 1
   const shown = active ?? lastIndex
-  const canDraw = width > 0 && points.length >= 2
+  const canDraw = width > 0 && points.length >= 1
+  const singlePoint = points.length === 1
 
   function pointerIndex(event: React.PointerEvent<SVGSVGElement>) {
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -124,8 +132,8 @@ export function AreaTrend({
           >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.14" />
-                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.01" />
+                <stop offset="0%" stopColor={color} stopOpacity="0.14" />
+                <stop offset="100%" stopColor={color} stopOpacity="0.01" />
               </linearGradient>
             </defs>
 
@@ -153,33 +161,50 @@ export function AreaTrend({
               </g>
             ))}
 
-            <path d={area} fill={`url(#${gradientId})`} />
-            <path
-              d={line}
-              fill="none"
-              stroke="var(--primary)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            {!singlePoint ? (
+              <>
+                <path d={area} fill={`url(#${gradientId})`} />
+                <path
+                  d={line}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </>
+            ) : null}
 
             {/* First and last day anchor the x-axis without crowding it. */}
-            <text
-              x={MARGIN.left}
-              y={height - 6}
-              textAnchor="start"
-              className="fill-muted-foreground text-[10px]"
-            >
-              {formatLabel(points[0].label)}
-            </text>
-            <text
-              x={MARGIN.left + plotWidth}
-              y={height - 6}
-              textAnchor="end"
-              className="fill-muted-foreground text-[10px]"
-            >
-              {formatLabel(points[lastIndex].label)}
-            </text>
+            {singlePoint ? (
+              <text
+                x={x(0)}
+                y={height - 6}
+                textAnchor="middle"
+                className="fill-muted-foreground text-[10px]"
+              >
+                {formatLabel(points[0].label)}
+              </text>
+            ) : (
+              <>
+                <text
+                  x={MARGIN.left}
+                  y={height - 6}
+                  textAnchor="start"
+                  className="fill-muted-foreground text-[10px]"
+                >
+                  {formatLabel(points[0].label)}
+                </text>
+                <text
+                  x={MARGIN.left + plotWidth}
+                  y={height - 6}
+                  textAnchor="end"
+                  className="fill-muted-foreground text-[10px]"
+                >
+                  {formatLabel(points[lastIndex].label)}
+                </text>
+              </>
+            )}
 
             {active !== null ? (
               <line
@@ -197,13 +222,30 @@ export function AreaTrend({
               cx={x(shown)}
               cy={y(points[shown].value)}
               r="4"
-              fill="var(--primary)"
+              fill={color}
               stroke="var(--card)"
               strokeWidth="2"
             />
+
+            {singlePoint ? (
+              <text
+                x={x(0)}
+                y={Math.max(y(points[0].value) - 12, 12)}
+                textAnchor="middle"
+                className="fill-foreground text-[11px] font-medium"
+              >
+                {formatValue(points[0].value)}
+              </text>
+            ) : null}
           </svg>
         ) : (
-          <div style={{ height }} aria-hidden="true" />
+          <div
+            style={{ height }}
+            className="flex items-center justify-center text-sm text-muted-foreground"
+            role="status"
+          >
+            {emptyLabel}
+          </div>
         )}
 
         {canDraw && active !== null ? (

@@ -2,13 +2,16 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PasswordField } from "./password-field"
-import { AuthShell, NotConfiguredNotice } from "./auth-shell"
+import { AuthShell, FormNotice } from "./auth-shell"
 import { useLocale } from "@/components/providers/locale-provider"
 import { looksLikeEmail, signUp, MIN_PASSWORD_LENGTH } from "@/lib/auth"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/components/providers/auth-provider"
 
 const copy = {
   en: {
@@ -54,7 +57,9 @@ export function SignupForm() {
   const [password, setPassword] = React.useState("")
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [pending, setPending] = React.useState(false)
-  const [notConfigured, setNotConfigured] = React.useState(false)
+  const [formError, setFormError] = React.useState<string>()
+  const router = useRouter()
+  const { establishSession } = useAuth()
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -66,9 +71,18 @@ export function SignupForm() {
     if (Object.keys(next).length > 0) return
 
     setPending(true)
+    setFormError(undefined)
     const result = await signUp({ name: name.trim(), email: email.trim(), password })
     setPending(false)
-    if (!result.ok && result.reason === "not-configured") setNotConfigured(true)
+
+    if (result.ok) {
+      establishSession(result.user)
+      router.replace("/events")
+      return
+    }
+    // Field-level messages from the server win over the generic banner.
+    setErrors(result.fieldErrors ?? {})
+    setFormError(result.fieldErrors ? undefined : result.message)
   }
 
   return (
@@ -88,7 +102,7 @@ export function SignupForm() {
       }
     >
       <form onSubmit={onSubmit} noValidate className="space-y-5">
-        {notConfigured ? <NotConfiguredNotice /> : null}
+        {formError ? <FormNotice message={formError} /> : null}
 
         <div className="space-y-1.5">
           <Label htmlFor="name">{c.name}</Label>
@@ -140,6 +154,7 @@ export function SignupForm() {
         />
 
         <Button type="submit" size="lg" className="w-full" disabled={pending}>
+          {pending ? <BrandSpinner label="" /> : null}
           {pending ? c.submitting : c.submit}
         </Button>
 

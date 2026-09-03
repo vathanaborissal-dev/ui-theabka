@@ -63,7 +63,7 @@ export function GuestRowMenu({
           <DropdownMenuLabel>{t("guests.field.rsvp")}</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() =>
-              updateGuest(guest.id, { rsvp: "confirmed", respondedAt: new Date().toISOString() })
+              updateGuest(guest.eventId, guest.id, { rsvp: "confirmed", respondedAt: new Date().toISOString() })
             }
           >
             <Check />
@@ -71,7 +71,7 @@ export function GuestRowMenu({
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
-              updateGuest(guest.id, { rsvp: "declined", respondedAt: new Date().toISOString() })
+              updateGuest(guest.eventId, guest.id, { rsvp: "declined", respondedAt: new Date().toISOString() })
             }
           >
             <X />
@@ -83,7 +83,7 @@ export function GuestRowMenu({
         <DropdownMenuItem
           variant="destructive"
           onClick={() => {
-            removeGuests([guest.id])
+            removeGuests(guest.eventId, [guest.id])
             toast.success(`${guest.name} removed`)
           }}
         >

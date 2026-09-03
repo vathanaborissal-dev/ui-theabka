@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Plus, Receipt } from "lucide-react"
+import { Paperclip, Plus, Receipt } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { Pagination } from "@/components/shared/pagination"
@@ -12,7 +12,9 @@ import { BarList } from "@/components/charts/bar-list"
 import { Panel } from "@/components/shared/panel"
 import { ExpenseStatusBadge } from "@/components/shared/status-badge"
 import { ExpenseDialog } from "./expense-dialog"
-import { useData, useEventData } from "@/components/providers/data-provider"
+import { ExpenseDetailsSheet } from "./expense-details-sheet"
+import { useExpenseDetail } from "./use-expense-detail"
+import { useData, useAllGuests, useBudget, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { daysUntil, formatDate, formatMoney, formatNumber } from "@/lib/format"
 import { expenseStats, giftStats } from "@/lib/stats"
@@ -28,12 +30,18 @@ export function ExpensesView({
   /** Opens the add-expense dialog straight away. */
   openNew?: boolean
 }) {
-  const { event, expenses, guests } = useEventData(eventId)
+  const { event, expenses } = useEventData(eventId)
+  // Loads every row on purpose — gift income is totalled against the budget.
+  const { guests } = useAllGuests(event?.id)
+  // Loaded on view — the budget table totals every line.
+  useBudget(event?.id)
   const { updateExpense } = useData()
   const { t, locale } = useLocale()
 
   const [editing, setEditing] = React.useState<Expense | undefined>()
   const [open, setOpen] = React.useState(openNew)
+  const [viewingId, setViewingId] = React.useState<string>()
+  const detail = useExpenseDetail(event?.id, viewingId)
 
   // Above the early return: the pagination hook cannot run conditionally.
   const rows = [...expenses].sort((a, b) => b.amount - a.amount)
@@ -48,6 +56,20 @@ export function ExpensesView({
   function openDialog(expense?: Expense) {
     setEditing(expense)
     setOpen(true)
+  }
+
+  async function markPaid(expense: Expense) {
+    try {
+      await updateExpense(expense.id, {
+        paidAmount: expense.amount,
+        status: "paid",
+      })
+      toast.success(`${expense.title} marked paid`)
+      return true
+    } catch {
+      toast.error("That could not be saved. Please try again.")
+      return false
+    }
   }
 
   return (
@@ -66,6 +88,7 @@ export function ExpensesView({
       {expenses.length === 0 ? (
         <EmptyState
           icon={Receipt}
+          mascotMotion="idle"
           title={t("expenses.empty.title")}
           description={t("expenses.empty.body")}
           action={
@@ -149,7 +172,7 @@ export function ExpensesView({
                     <li key={expense.id} className="flex items-start gap-3 px-4 py-3">
                       <button
                         type="button"
-                        onClick={() => openDialog(expense)}
+                        onClick={() => setViewingId(expense.id)}
                         className="min-w-0 flex-1 text-left outline-none focus-visible:underline"
                       >
                         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -165,6 +188,15 @@ export function ExpensesView({
                               {t("expenses.dueDate")} {formatDate(expense.dueDate, locale, "dayMonth")}
                             </span>
                           ) : null}
+                          {expense.receiptUrl ? (
+                            <>
+                              {" · "}
+                              <span className="inline-flex items-center gap-1 text-primary">
+                                <Paperclip className="size-3" aria-hidden="true" />
+                                {t("expenses.receipt")}
+                              </span>
+                            </>
+                          ) : null}
                         </span>
                       </button>
 
@@ -175,13 +207,7 @@ export function ExpensesView({
                         {remaining > 0 ? (
                           <button
                             type="button"
-                            onClick={() => {
-                              updateExpense(expense.id, {
-                                paidAmount: expense.amount,
-                                status: "paid",
-                              })
-                              toast.success(`${expense.title} marked paid`)
-                            }}
+                            onClick={() => void markPaid(expense)}
                             className="text-xs text-primary underline-offset-2 outline-none hover:underline focus-visible:underline"
                           >
                             {t("action.markPaid")}
@@ -201,6 +227,26 @@ export function ExpensesView({
       )}
 
       <ExpenseDialog event={event} expense={editing} open={open} onOpenChange={setOpen} />
+      <ExpenseDetailsSheet
+        expense={detail.expense}
+        loading={detail.loading}
+        error={detail.error}
+        open={Boolean(viewingId)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setViewingId(undefined)
+        }}
+        onEdit={() => {
+          if (!detail.expense) return
+          setViewingId(undefined)
+          openDialog(detail.expense)
+        }}
+        onMarkPaid={async () => {
+          if (!detail.expense) return
+          const saved = await markPaid(detail.expense)
+          if (saved) await detail.refresh()
+        }}
+        onRetry={() => void detail.retry()}
+      />
     </div>
   )
 }

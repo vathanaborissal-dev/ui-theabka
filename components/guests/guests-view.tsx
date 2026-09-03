@@ -4,44 +4,40 @@ import * as React from "react"
 import {
   Check,
   Download,
+  MoreHorizontal,
+  Upload,
   Plus,
-  Search,
-  SlidersHorizontal,
   UserRoundCheck,
   Users,
   X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { PageHeader } from "@/components/shared/page-header"
 import { EmptyState } from "@/components/shared/empty-state"
 import { Pagination } from "@/components/shared/pagination"
-import { usePagination } from "@/components/shared/use-pagination"
 import { SegmentedBar } from "@/components/shared/segmented-bar"
 import { useData, useEventData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatNumber } from "@/lib/format"
 import { downloadCsv, toCsv } from "@/lib/csv"
-import { guestStats } from "@/lib/stats"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { GuestTable } from "./guest-table"
 import { GuestCards } from "./guest-cards"
 import { GuestFormSheet } from "./guest-form-sheet"
 import { RecordGiftDialog } from "./record-gift-dialog"
-import { groupGuests, useGuestFilters, type GroupBy } from "./use-guest-filters"
-import type { Guest, RsvpStatus, SideKey } from "@/lib/types"
-
-const rsvpOptions: RsvpStatus[] = ["confirmed", "maybe", "pending", "declined"]
+import { groupGuests, type GroupBy } from "./use-guest-filters"
+import { GuestFilterBar } from "./guest-filter-bar"
+import { ImportGuestsSheet } from "./import-guests-sheet"
+import { GuestListSkeleton, GuestSummarySkeleton } from "./guests-loading"
+import { useGuestPage } from "./use-guest-page"
+import { useGuestSummary } from "./use-guest-summary"
+import type { Guest, RsvpStatus } from "@/lib/types"
 
 export function GuestsView({
   eventId,
@@ -56,38 +52,45 @@ export function GuestsView({
   /** Opens the add-guest sheet straight away. */
   openNew?: boolean
 }) {
-  const { event, guests } = useEventData(eventId)
-  const { updateGuests, removeGuests } = useData()
+  const { event } = useEventData(eventId)
+  const { updateGuests, removeGuests, importGuests } = useData()
   const { t, L, locale } = useLocale()
 
+  // Filtering, sorting and paging all happen in the database. The browser
+  // holds one page, not the whole list.
   const {
+    pager,
+    guests,
+    loading: guestsLoading,
     filters,
     setFilters,
-    groupBy,
-    setGroupBy,
-    families,
-    filtered,
-    isFiltered,
     reset,
-  } = useGuestFilters(guests, {
+    reload: reloadGuests,
+    fetchAllMatching,
+  } = useGuestPage(event?.id, {
     ...(initialRsvp ? { rsvp: initialRsvp } : {}),
     ...(initialQuery ? { query: initialQuery } : {}),
   })
+  const [groupBy, setGroupBy] = React.useState<GroupBy>("none")
+  const families = React.useMemo(() => {
+    const set = new Set<string>()
+    for (const g of guests) if (g.family) set.add(g.family)
+    return [...set].sort()
+  }, [guests])
 
+  const [summaryToken, setSummaryToken] = React.useState(0)
+  const [exporting, setExporting] = React.useState(false)
+  const [importOpen, setImportOpen] = React.useState(false)
+  // Counted in the database: the browser holds one page, so counting what is
+  // on screen would report the page, not the guest list.
+  const { summary, loading: summaryLoading } = useGuestSummary(event?.id, summaryToken)
   const [selected, setSelected] = React.useState<Set<string>>(new Set())
   const [editing, setEditing] = React.useState<Guest | undefined>()
   const [formOpen, setFormOpen] = React.useState(openNew)
   const [giftGuest, setGiftGuest] = React.useState<Guest | undefined>()
   const [giftOpen, setGiftOpen] = React.useState(false)
-  const [showFilters, setShowFilters] = React.useState(false)
-
-  // Paginate before grouping, so a page holds N guests rather than N groups.
-  // Above the early return: hooks cannot run conditionally.
-  const pager = usePagination(filtered)
 
   if (!event) return null
-
-  const stats = guestStats(guests)
 
   // Select-all covers the rows actually on screen; quietly selecting a hundred
   // off-page guests would make the bulk actions dangerous.
@@ -135,21 +138,55 @@ export function GuestsView({
     setGiftOpen(true)
   }
 
+  /**
+   * Re-reads the page and the counts after an edit.
+   *
+   * The rows on screen came from the server, and a change may move a guest out
+   * of the current filter entirely — marking someone confirmed while filtering
+   * on "pending" should drop them from the list, not leave a stale row behind.
+   */
+  function refresh() {
+    reloadGuests()
+    setSummaryToken((token) => token + 1)
+  }
+
+  /**
+   * Reports success only once the server has accepted it.
+   *
+   * The toast used to fire immediately, which is how a silent no-op went
+   * unnoticed: every edit looked like it had saved whether or not a request
+   * was ever sent.
+   */
   function bulk(patch: Partial<Guest>, message: string) {
-    updateGuests(selectedVisible, patch)
-    toast.success(`${selectedVisible.length} ${message}`)
+    if (!event) return
+    const count = selectedVisible.length
+    void updateGuests(event.id, selectedVisible, patch)
+      .then(() => {
+        refresh()
+        toast.success(`${count} ${message}`)
+      })
+      .catch(() => toast.error("That could not be saved. Please try again."))
     setSelected(new Set())
   }
 
   const segments = [
-    { key: "confirmed", label: t("status.confirmed"), value: stats.confirmed, className: "bg-success" },
-    { key: "maybe", label: t("status.maybe"), value: stats.maybe, className: "bg-warning" },
-    { key: "declined", label: t("status.declined"), value: stats.declined, className: "bg-muted-foreground/45" },
-    { key: "pending", label: t("status.pending"), value: stats.pending, className: "bg-muted-foreground/15" },
+    { key: "confirmed", label: t("status.confirmed"), value: summary.confirmed, className: "bg-success" },
+    { key: "maybe", label: t("status.maybe"), value: summary.maybe, className: "bg-warning" },
+    { key: "declined", label: t("status.declined"), value: summary.declined, className: "bg-muted-foreground/45" },
+    { key: "pending", label: t("status.pending"), value: summary.pending, className: "bg-muted-foreground/15" },
   ]
 
   /** Exports the filtered list, so the file matches what is on screen. */
-  function exportVisible() {
+  async function exportVisible() {
+    if (exporting) return
+    setExporting(true)
+    // The whole filtered set, not the page on screen.
+    const rows = await fetchAllMatching().catch(() => null)
+    setExporting(false)
+    if (!rows) {
+      toast.error("The guest list could not be exported. Please try again.")
+      return
+    }
     if (!event) return
     const csv = toCsv(
       [
@@ -165,14 +202,14 @@ export function GuestsView({
         t("guests.field.gift"),
         t("guests.field.notes"),
       ],
-      filtered.map((guest) => [
+      rows.map((guest) => [
         guest.name,
         guest.nameKm,
         guest.family,
         guest.side === "shared" ? t("side.shared") : L(event.sides[guest.side]),
         guest.relationship,
         guest.partySize,
-        t(`status.${guest.rsvp}`),
+        t(`status.${guest.rsvp}` as Parameters<typeof t>[0]),
         guest.table,
         guest.phone,
         guest.gift?.amount,
@@ -180,7 +217,7 @@ export function GuestsView({
       ])
     )
     downloadCsv(`${event.slug}-guests.csv`, csv)
-    toast.success(`${formatNumber(filtered.length, locale)} ${t("guests.parties").toLowerCase()}`)
+    toast.success(`${formatNumber(rows.length, locale)} ${t("guests.parties").toLowerCase()}`)
   }
 
   return (
@@ -190,10 +227,48 @@ export function GuestsView({
         description={t("guests.subtitle")}
         actions={
           <>
-            <Button variant="outline" onClick={exportVisible} disabled={filtered.length === 0}>
-              <Download />
-              {t("action.export")}
-            </Button>
+            {/* Import and export are occasional; adding a guest is the reason
+                people open this page. On a narrow screen the two rarer ones
+                fold into a menu rather than pushing the primary action onto a
+                second row. */}
+            <div className="hidden gap-2 sm:flex">
+              <Button variant="outline" onClick={() => setImportOpen(true)}>
+                <Upload />
+                {t("guests.importAction")}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => void exportVisible()}
+                disabled={exporting || summary.invited === 0}
+              >
+                <Download />
+                {t("action.export")}
+              </Button>
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="outline" size="icon" className="sm:hidden" aria-label={t("common.more")}>
+                    <MoreHorizontal />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setImportOpen(true)}>
+                  <Upload />
+                  {t("guests.importAction")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={exporting || summary.invited === 0}
+                  onClick={() => void exportVisible()}
+                >
+                  <Download />
+                  {t("action.export")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button onClick={() => openEdit(undefined)}>
               <Plus />
               {t("action.addGuest")}
@@ -203,142 +278,47 @@ export function GuestsView({
       />
 
       <section className="grid gap-4 rounded-[var(--card-radius)] border border-[var(--card-border-color)] bg-card p-5 shadow-(--shadow-card) sm:grid-cols-[auto_1fr] sm:gap-8">
-        <dl className="flex gap-6">
-          <div>
-            <dt className="text-xs text-muted-foreground">{t("guests.parties")}</dt>
-            <dd className="display tnum text-2xl">{formatNumber(stats.invitations, locale)}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">{t("guests.seats")}</dt>
-            <dd className="display tnum text-2xl">{formatNumber(stats.invitedSeats, locale)}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">{t("dash.expectedAttendance")}</dt>
-            <dd className="display tnum text-2xl text-primary">
-              {formatNumber(stats.expectedSeats, locale)}
-            </dd>
-          </div>
-        </dl>
-        <SegmentedBar segments={segments} total={stats.invitations} className="self-center" />
+        {summaryLoading ? (
+          <GuestSummarySkeleton />
+        ) : (
+          <>
+            <dl className="flex gap-6">
+              <div>
+                <dt className="text-xs text-muted-foreground">{t("guests.parties")}</dt>
+                <dd className="display tnum text-2xl">{formatNumber(summary.invited, locale)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">{t("dash.expectedAttendance")}</dt>
+                <dd className="display tnum text-2xl text-primary">
+                  {formatNumber(summary.expectedSeats, locale)}
+                </dd>
+              </div>
+            </dl>
+            <SegmentedBar segments={segments} total={summary.invited} className="self-center" />
+          </>
+        )}
       </section>
 
       <div className="overflow-hidden rounded-[var(--card-radius)] border border-[var(--card-border-color)] bg-card shadow-(--shadow-card)">
-        <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
-          <div className="relative min-w-0 flex-1 sm:max-w-xs">
-            <Search
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              type="search"
-              value={filters.query}
-              onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
-              placeholder={t("guests.searchPlaceholder")}
-              aria-label={t("action.search")}
-              className="pl-9"
-            />
-          </div>
+        <GuestFilterBar
+          filters={filters}
+          setFilters={setFilters}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
+          families={families}
+          sides={{ a: L(event.sides.a), b: L(event.sides.b) }}
+          shown={pager.total}
+          total={summary.invited}
+        />
 
-          <div className="hidden items-center gap-2 md:flex">
-            <FilterSelects
-              filters={filters}
-              setFilters={setFilters}
-              families={families}
-              sides={{ a: L(event.sides.a), b: L(event.sides.b) }}
-            />
-          </div>
 
-          <Button
-            variant={showFilters ? "secondary" : "outline"}
-            size="icon"
-            className="md:hidden"
-            aria-expanded={showFilters}
-            aria-label={t("action.filter")}
-            onClick={() => setShowFilters((v) => !v)}
-          >
-            <SlidersHorizontal />
-          </Button>
-
-          <Select
-            value={groupBy}
-            onValueChange={(v) => setGroupBy(v as GroupBy)}
-            items={[
-              { value: "none", label: t("guests.groupBy.none") },
-              { value: "side", label: t("guests.groupBy.side") },
-              { value: "family", label: t("guests.groupBy.family") },
-              { value: "rsvp", label: t("guests.groupBy.rsvp") },
-            ]}
-          >
-            <SelectTrigger size="sm" aria-label={t("guests.groupBy")} className="hidden lg:flex">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{t("guests.groupBy.none")}</SelectItem>
-              <SelectItem value="side">{t("guests.groupBy.side")}</SelectItem>
-              <SelectItem value="family">{t("guests.groupBy.family")}</SelectItem>
-              <SelectItem value="rsvp">{t("guests.groupBy.rsvp")}</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {isFiltered ? (
-            <Button variant="ghost" size="sm" onClick={reset}>
-              <X />
-              <span className="hidden sm:inline">{t("action.clearFilters")}</span>
-            </Button>
-          ) : null}
-
-          <p className="ml-auto hidden shrink-0 text-xs text-muted-foreground sm:block">
-            {formatNumber(filtered.length, locale)} {t("common.of")}{" "}
-            {formatNumber(guests.length, locale)}
-          </p>
-        </div>
-
-        {showFilters ? (
-          <div className="grid gap-3 border-b border-border bg-muted/30 p-3 md:hidden">
-            <FilterSelects
-              filters={filters}
-              setFilters={setFilters}
-              families={families}
-              sides={{ a: L(event.sides.a), b: L(event.sides.b) }}
-              full
-            />
-            <div className="flex items-center gap-2">
-              <Switch
-                id="only-gift"
-                checked={filters.onlyWithGift}
-                onCheckedChange={(v) => setFilters((f) => ({ ...f, onlyWithGift: Boolean(v) }))}
-              />
-              <Label htmlFor="only-gift" className="text-sm font-normal">
-                {t("gifts.givers")}
-              </Label>
-            </div>
-            <Select
-              value={groupBy}
-              onValueChange={(v) => setGroupBy(v as GroupBy)}
-              items={[
-                { value: "none", label: t("guests.groupBy.none") },
-                { value: "side", label: t("guests.groupBy.side") },
-                { value: "family", label: t("guests.groupBy.family") },
-                { value: "rsvp", label: t("guests.groupBy.rsvp") },
-              ]}
-            >
-              <SelectTrigger className="w-full" aria-label={t("guests.groupBy")}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{t("guests.groupBy.none")}</SelectItem>
-                <SelectItem value="side">{t("guests.groupBy.side")}</SelectItem>
-                <SelectItem value="family">{t("guests.groupBy.family")}</SelectItem>
-                <SelectItem value="rsvp">{t("guests.groupBy.rsvp")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        ) : null}
-
-        {filtered.length === 0 ? (
+        {guestsLoading ? (
+          <GuestListSkeleton />
+        ) : guests.length === 0 ? (
           <div className="p-5">
             <EmptyState
               icon={Users}
+              mascotMotion={guests.length === 0 ? "waving" : undefined}
               title={t(guests.length === 0 ? "guests.empty.title" : "guests.noResults.title")}
               description={t(guests.length === 0 ? "guests.empty.body" : "guests.noResults.body")}
               action={
@@ -393,13 +373,38 @@ export function GuestsView({
         }
         onCheckIn={() => bulk({ attendance: "attended" }, t("status.attended").toLowerCase())}
         onDelete={() => {
-          removeGuests(selectedVisible)
-          toast.success(`${selectedVisible.length} removed`)
+          const count = selectedVisible.length
+          void removeGuests(event.id, selectedVisible)
+            .then(() => {
+              refresh()
+              toast.success(`${count} removed`)
+            })
+            .catch(() => toast.error("Those could not be removed. Please try again."))
           setSelected(new Set())
         }}
       />
 
-      <GuestFormSheet event={event} guest={editing} open={formOpen} onOpenChange={setFormOpen} />
+      <ImportGuestsSheet
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={async (incoming) => {
+          const created = await importGuests(event.id, incoming)
+          refresh()
+          return created.length
+        }}
+      />
+
+      <GuestFormSheet
+        event={event}
+        guest={editing}
+        open={formOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open)
+          // Closing means it either saved or was cancelled; re-reading covers
+          // both without the sheet having to report which.
+          if (!open) refresh()
+        }}
+      />
       <RecordGiftDialog
         guest={giftGuest}
         currency={event.currency}
@@ -407,96 +412,6 @@ export function GuestsView({
         onOpenChange={setGiftOpen}
       />
     </div>
-  )
-}
-
-function FilterSelects({
-  filters,
-  setFilters,
-  families,
-  sides,
-  full,
-}: {
-  filters: ReturnType<typeof useGuestFilters>["filters"]
-  setFilters: ReturnType<typeof useGuestFilters>["setFilters"]
-  families: string[]
-  sides: { a: string; b: string }
-  full?: boolean
-}) {
-  const { t } = useLocale()
-  const width = full ? "w-full" : ""
-
-  return (
-    <>
-      <Select
-        value={filters.rsvp}
-        onValueChange={(v) => setFilters((f) => ({ ...f, rsvp: v as RsvpStatus | "all" }))}
-        items={[
-          { value: "all", label: `${t("common.all")} — ${t("guests.field.rsvp")}` },
-          ...rsvpOptions.map((r) => ({ value: r, label: t(`status.${r}`) })),
-        ]}
-      >
-        <SelectTrigger size={full ? "default" : "sm"} className={width} aria-label={t("guests.field.rsvp")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{`${t("common.all")} — ${t("guests.field.rsvp")}`}</SelectItem>
-          {rsvpOptions.map((r) => (
-            <SelectItem key={r} value={r}>
-              {t(`status.${r}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={filters.side}
-        onValueChange={(v) => setFilters((f) => ({ ...f, side: v as SideKey | "all" }))}
-        items={[
-          { value: "all", label: `${t("common.all")} — ${t("side.label")}` },
-          { value: "a", label: sides.a },
-          { value: "b", label: sides.b },
-          { value: "shared", label: t("side.shared") },
-        ]}
-      >
-        <SelectTrigger size={full ? "default" : "sm"} className={width} aria-label={t("side.label")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{`${t("common.all")} — ${t("side.label")}`}</SelectItem>
-          <SelectItem value="a">{sides.a}</SelectItem>
-          <SelectItem value="b">{sides.b}</SelectItem>
-          <SelectItem value="shared">{t("side.shared")}</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {families.length > 0 ? (
-        <Select
-          value={filters.family}
-          onValueChange={(v) => setFilters((f) => ({ ...f, family: v ?? "all" }))}
-          items={[
-            { value: "all", label: `${t("common.all")} — ${t("guests.field.family")}` },
-            ...families.map((f) => ({ value: f, label: f })),
-          ]}
-        >
-          <SelectTrigger
-            size={full ? "default" : "sm"}
-            className={cn(width, !full && "max-w-44")}
-            aria-label={t("guests.field.family")}
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{`${t("common.all")} — ${t("guests.field.family")}`}</SelectItem>
-            {families.map((f) => (
-              <SelectItem key={f} value={f}>
-                {f}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : null}
-    </>
   )
 }
 

@@ -7,9 +7,30 @@ import { Reveal } from "@/components/invitation/motion"
 import { InvitationGallery } from "@/components/invitation/gallery"
 import { KbachDivider, LotusMark } from "@/components/invitation/ornaments"
 import { LotusFrieze, Romduol } from "@/components/invitation/khmer-ornaments"
-import { MotifRule } from "@/components/invitation/motif"
+import { Motif, MotifRule } from "@/components/invitation/motif"
+import { GoldPlaque } from "@/components/invitation/gold-ornaments"
 import { cn } from "@/lib/utils"
-import type { ContactPerson, EventRecord } from "@/lib/types"
+import type { ContactPerson, InvitationEvent } from "@/lib/types"
+
+/**
+ * The parts an invitation is made of, named independently of any template.
+ *
+ * Shared by the editor and the card so the two can refer to the same thing:
+ * the builder knows a field belongs to "gift", and whichever template is
+ * showing knows where its gift section is.
+ */
+export type InvSectionId =
+  | "cover"
+  | "letter"
+  | "countdown"
+  | "schedule"
+  | "venue"
+  | "gallery"
+  | "thanks"
+  | "gift"
+  | "rsvp"
+  | "wishes"
+  | "contacts"
 
 /** Section shell shared by every template. Templates vary the heading treatment. */
 export function InvSection({
@@ -19,6 +40,7 @@ export function InvSection({
   ornament = "none",
   align = "center",
   id,
+  section,
 }: {
   title?: string
   children: React.ReactNode
@@ -27,13 +49,23 @@ export function InvSection({
   /** Ranged-left headings give the formal and editorial templates their voice. */
   align?: "center" | "left"
   id?: string
+  /**
+   * Which part of the invitation this is, in template-independent terms.
+   *
+   * The builder scrolls its preview to the section whose field has focus, and
+   * it cannot know how any given template lays itself out. Naming the sections
+   * here means that works for every template that labels them, rather than
+   * only the one the feature was written against.
+   */
+  section?: InvSectionId
 }) {
   const { entrance = "rise", dividerMotifId } = useDesign()
   const motionEnabled = useInvitationMotionEnabled()
 
   return (
     <section
-      id={id}
+      id={id ?? (section ? `inv-${section}` : undefined)}
+      data-inv-section={section}
       data-align={align}
       data-ornament={ornament}
       className={cn("inv-section px-6 py-12 @xl:py-16", className)}
@@ -152,10 +184,40 @@ export function ContactList({ contacts }: { contacts: ContactPerson[] }) {
   )
 }
 
-export function InvitationFooter({ event }: { event: EventRecord }) {
+export function InvitationFooter({
+  event,
+  showCouple = true,
+}: {
+  event: InvitationEvent
+  /**
+   * Off for a template that already stands the couple somewhere of its own —
+   * two of them on one card reads as a mistake.
+   */
+  showCouple?: boolean
+}) {
   const { L } = useLocale()
+  const design = useDesign()
+
   return (
     <footer className="border-t border-(--inv-border) px-6 py-10 text-center">
+      {/*
+       * The couple, closing the card.
+       *
+       * Only one template had anywhere to put this, so on the other thirteen
+       * choosing an illustration did nothing at all — the setting was there
+       * and the picture never appeared. Above the names is where a printed
+       * Cambodian card puts them, and it is the one place every template that
+       * uses this footer already has room for.
+       *
+       * Only when one is actually chosen: the picker's first option is the
+       * drawn pair, and rendering that by default would put a couple on every
+       * card whose design never asked for one.
+       */}
+      {showCouple && design.coupleMotifId ? (
+        <div className="mx-auto mb-6 h-40 @xl:h-48">
+          <Motif assetId={design.coupleMotifId} fallback={null} className="mx-auto h-full w-auto" />
+        </div>
+      ) : null}
       <LotusMark className="mx-auto mb-3 size-6 text-(--inv-gold)" />
       <p
         className="text-lg text-(--inv-fg)"
@@ -168,8 +230,20 @@ export function InvitationFooter({ event }: { event: EventRecord }) {
   )
 }
 
-/** Adds a calendar link without a library — a data: .ics the browser downloads. */
-export function AddToCalendar({ event }: { event: EventRecord }) {
+/**
+ * Adds a calendar link without a library — a data: .ics the browser downloads.
+ *
+ * `variant="plaque"` wears the gold kbach button instead of a text link, for
+ * the templates whose other calls to action are plaques; a lone underlined
+ * link among them reads as an oversight rather than a choice.
+ */
+export function AddToCalendar({
+  event,
+  variant = "link",
+}: {
+  event: InvitationEvent
+  variant?: "link" | "plaque"
+}) {
   const { t, L } = useLocale()
   const start = new Date(event.date)
   const end = new Date(start.getTime() + 5 * 60 * 60 * 1000)
@@ -187,9 +261,30 @@ export function AddToCalendar({ event }: { event: EventRecord }) {
     "END:VCALENDAR",
   ].join("\n")
 
+  const href = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`
+
+  if (variant === "plaque") {
+    return (
+      <a
+        href={href}
+        download={`${event.slug}.ics`}
+        className="inline-block outline-none focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
+      >
+        <GoldPlaque>
+          <span
+            className="text-sm leading-tight text-[#5b4526]"
+            style={{ fontFamily: "var(--inv-font-display)" }}
+          >
+            {t("public.addToCalendar")}
+          </span>
+        </GoldPlaque>
+      </a>
+    )
+  }
+
   return (
     <a
-      href={`data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`}
+      href={href}
       download={`${event.slug}.ics`}
       className="inline-flex min-h-11 items-center gap-2 px-2 py-2.5 text-sm text-(--inv-accent) underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-(--inv-accent)/40"
     >

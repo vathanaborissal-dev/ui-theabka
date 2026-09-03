@@ -9,6 +9,7 @@ import { InvitationCountdown } from "../sections/countdown"
 import { InvitationSchedule } from "../sections/schedule"
 import { InvitationVenue } from "../sections/venue"
 import { InvitationRsvpForm } from "../sections/rsvp-form"
+import { GuestHonour } from "../sections/guest-honour"
 import {
   AddToCalendar,
   ContactList,
@@ -85,7 +86,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
           <div className="px-6 pt-6">
             <div className="relative mx-auto max-w-md">
               <FramedPhoto
-                src={design.coverPhoto ?? event.coverPhoto}
+                src={design.coverPhoto}
                 alt=""
                 seed={2}
                 frame={design.photoFrame ?? "oval"}
@@ -102,7 +103,8 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
           </div>
         ) : null}
 
-        <InvSection>
+        <InvSection section="letter">
+          <GuestHonour guestName={guestName} className="mb-8" />
           <p className="mx-auto max-w-md text-center text-base leading-loose text-(--inv-muted)">
             {L(design.message)}
           </p>
@@ -116,7 +118,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
 
         {design.showSchedule && event.schedule.length > 0 ? (
           <InvSection
-            title={t("public.scheduleTitle")}
+            title={t("public.scheduleTitle")} section="schedule"
             ornament={orn.sectionOrnament}
             className="bg-(--inv-surface)/75"
           >
@@ -125,13 +127,13 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {design.showGallery && design.gallery.length > 0 ? (
-          <InvSection title={t("inv.gallery")} ornament={orn.sectionOrnament}>
+          <InvSection title={t("inv.gallery")} section="gallery" ornament={orn.sectionOrnament}>
             <GalleryStrip photos={design.gallery} />
           </InvSection>
         ) : null}
 
         <InvSection
-          title={t("public.venueTitle")}
+          title={t("public.venueTitle")} section="venue"
           ornament={orn.sectionOrnament}
           className="bg-(--inv-surface)/75"
         >
@@ -139,7 +141,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (
-          <InvSection title={t("public.giftTitle")} ornament={orn.sectionOrnament}>
+          <InvSection title={t("public.giftTitle")} section="gift" ornament={orn.sectionOrnament}>
             <GiftNote note={design.giftNote} />
           </InvSection>
         ) : null}
@@ -147,7 +149,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
         {design.showRsvp ? (
           <InvSection
             id="rsvp"
-            title={t("public.rsvpTitle")}
+            title={t("public.rsvpTitle")} section="rsvp"
             ornament={orn.sectionOrnament}
             className="bg-(--inv-surface)/75"
           >
@@ -156,7 +158,7 @@ export function RomduolTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {event.contacts.length > 0 ? (
-          <InvSection title={t("public.contactHosts")} ornament="rule">
+          <InvSection title={t("public.contactHosts")} section="contacts" ornament="rule">
             <ContactList contacts={event.contacts} />
           </InvSection>
         ) : null}

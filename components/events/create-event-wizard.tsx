@@ -2,9 +2,11 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ArrowRight, Cake, Check, Flower2, GraduationCap, Heart, HeartHandshake, Home, PartyPopper, Sparkles, Users } from "lucide-react"
+import {ArrowLeft, ArrowRight, Cake, Check, Flower2, GraduationCap, Heart, HeartHandshake, Home, PartyPopper, Sparkles, Users} from "lucide-react"
+import { BrandSpinner } from "@/components/brand/brand-spinner"
 import { Button } from "@/components/ui/button"
 import { ButtonLink } from "@/components/ui/button-link"
+import { CoverPhotoField } from "@/components/shared/cover-photo-field"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,6 +18,7 @@ import { useData } from "@/components/providers/data-provider"
 import { useLocale } from "@/components/providers/locale-provider"
 import { getTemplate, templatesFor } from "@/lib/invitation/templates"
 import { cn } from "@/lib/utils"
+import { ApiError } from "@/lib/api-client"
 import { toast } from "sonner"
 import type { EventRecord, EventType, LocalizedText } from "@/lib/types"
 
@@ -69,6 +72,8 @@ export function CreateEventWizard() {
   const [hostB, setHostB] = React.useState("")
   const [contactPhone, setContactPhone] = React.useState("")
   const [description, setDescription] = React.useState("")
+  const [coverPhoto, setCoverPhoto] = React.useState<string>()
+  const [creating, setCreating] = React.useState(false)
 
   const index = STEPS.indexOf(step)
   const isCouple = type === "wedding" || type === "engagement"
@@ -82,24 +87,20 @@ export function CreateEventWizard() {
 
   function next() {
     if (index < STEPS.length - 1) setStep(STEPS[index + 1])
-    else create()
+    else void create()
   }
 
-  function create() {
-    const slug =
-      (title.en || title.km)
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-")
-        .slice(0, 48) || `event-${Date.now()}`
-
+  async function create() {
+    if (creating) return
     const template = getTemplate(templatesFor(type)[0].id)
     const id = `evt_${Date.now()}`
 
     const event: EventRecord = {
       id,
-      slug: `${slug}-${String(Date.now()).slice(-4)}`,
+      // Left to the server, which derives it from the title and owns
+      // uniqueness. A suffix added here would be permanent noise in the one
+      // URL guests actually see.
+      slug: "",
       type,
       status: "draft",
       title,
@@ -142,7 +143,7 @@ export function CreateEventWizard() {
       description: { en: description, km: description },
       sides: defaultSides(type),
       currency: "USD",
-      coverPhoto: "",
+      coverPhoto: coverPhoto ?? "",
       design: {
         templateId: template.id,
         paletteId: template.defaultPalette,
@@ -158,9 +159,15 @@ export function CreateEventWizard() {
       createdAt: new Date().toISOString(),
     }
 
-    createEvent(event)
-    toast.success("Event created — now design your invitation")
-    router.push(`/events/${id}/invitation`)
+    setCreating(true)
+    try {
+      const saved = await createEvent(event)
+      toast.success("Event created — now design your invitation")
+      router.push(`/events/${saved.id}/invitation`)
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Could not create the event")
+      setCreating(false)
+    }
   }
 
   return (
@@ -265,6 +272,20 @@ export function CreateEventWizard() {
                 placeholder="We would be honoured by your presence…"
               />
             </div>
+            <div className="space-y-1.5">
+              <Label>
+                Cover photo
+                <span className="ml-1.5 font-normal text-muted-foreground">
+                  ({t("common.optional")})
+                </span>
+              </Label>
+              <CoverPhotoField
+                value={coverPhoto}
+                onChange={setCoverPhoto}
+                label="Add a cover photo"
+                hint="Shown on the invitation, and in the preview when you share the link."
+              />
+            </div>
           </StepShell>
         ) : null}
 
@@ -366,16 +387,16 @@ export function CreateEventWizard() {
           <Button
             variant="ghost"
             onClick={() => setStep(STEPS[Math.max(0, index - 1)])}
-            disabled={index === 0}
+            disabled={index === 0 || creating}
           >
             <ArrowLeft />
             {t("action.back")}
           </Button>
-          <Button size="lg" onClick={next} disabled={!canContinue}>
+          <Button size="lg" onClick={next} disabled={!canContinue || creating}>
             {index === STEPS.length - 1 ? (
               <>
-                <Check />
-                {t("action.createEvent")}
+                {creating ? <BrandSpinner /> : <Check />}
+                {creating ? "Creating…" : t("action.createEvent")}
               </>
             ) : (
               <>

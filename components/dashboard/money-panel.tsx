@@ -4,9 +4,10 @@ import { ArrowRight } from "lucide-react"
 import { ButtonLink } from "@/components/ui/button-link"
 import { useLocale } from "@/components/providers/locale-provider"
 import { formatMoney, formatNumber } from "@/lib/format"
-import { expenseStats, giftStats } from "@/lib/stats"
+import { expenseTotalIn } from "@/lib/summaries"
+import type { ExpenseSummary } from "@/lib/budget"
 import { cn } from "@/lib/utils"
-import type { EventRecord, Expense, Guest } from "@/lib/types"
+import type { EventRecord } from "@/lib/types"
 
 /**
  * Gifts against expenses. In Cambodia the cash gifts are genuinely expected to
@@ -15,16 +16,23 @@ import type { EventRecord, Expense, Guest } from "@/lib/types"
  */
 export function MoneyPanel({
   event,
-  guests,
-  expenses,
+  giftTotal,
+  giftCount,
+  costs: costSummary,
 }: {
   event: EventRecord
-  guests: Guest[]
-  expenses: Expense[]
+  /** In the event's own currency; the API keeps currencies apart. */
+  giftTotal: number
+  giftCount: number
+  costs: ExpenseSummary
 }) {
   const { t, locale } = useLocale()
-  const gifts = giftStats(guests)
-  const costs = expenseStats(expenses)
+  // Totalled by the database, not by walking rows in the browser.
+  const gifts = { total: giftTotal, count: giftCount }
+  const costs = {
+    total: expenseTotalIn(costSummary, event.currency, "budgeted"),
+    outstanding: expenseTotalIn(costSummary, event.currency, "outstanding"),
+  }
 
   const scale = Math.max(gifts.total, costs.total, 1)
   const balance = gifts.total - costs.total
@@ -37,7 +45,7 @@ export function MoneyPanel({
           <h2 className="display text-base">{t("dash.giftsVsExpenses")}</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {formatNumber(gifts.count, locale)} {t("gifts.givers").toLowerCase()} ·{" "}
-            {formatNumber(expenses.length, locale)} {t("expenses.title").toLowerCase()}
+            {formatNumber(costSummary.lines, locale)} {t("expenses.title").toLowerCase()}
           </p>
         </div>
         <ButtonLink href={`/events/${event.id}/gifts`} variant="ghost" size="sm">

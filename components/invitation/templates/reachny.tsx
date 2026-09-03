@@ -148,7 +148,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
           <InvSection align="left" className="pb-0">
             <div className="mx-auto max-w-md">
               <FramedPhoto
-                src={design.coverPhoto ?? event.coverPhoto}
+                src={design.coverPhoto}
                 alt=""
                 seed={1}
                 frame={design.photoFrame ?? "gold"}
@@ -159,7 +159,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
           </InvSection>
         ) : null}
 
-        <InvSection align="left">
+        <InvSection align="left" section="letter">
           <p className="mx-auto max-w-md text-center text-base leading-loose text-(--inv-muted)">
             {L(design.message)}
           </p>
@@ -173,7 +173,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
 
         {design.showSchedule && event.schedule.length > 0 ? (
           <InvSection align="left"
-            title={t("public.scheduleTitle")}
+            title={t("public.scheduleTitle")} section="schedule"
             ornament={orn.sectionOrnament}
             className="border-y border-(--inv-accent)/20 bg-(--inv-surface)/70"
           >
@@ -182,13 +182,13 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {design.showGallery && design.gallery.length > 0 ? (
-          <InvSection align="left" title={t("inv.gallery")} ornament={orn.sectionOrnament}>
+          <InvSection align="left" title={t("inv.gallery")} section="gallery" ornament={orn.sectionOrnament}>
             <GalleryStrip photos={design.gallery} />
           </InvSection>
         ) : null}
 
         <InvSection align="left"
-          title={t("public.venueTitle")}
+          title={t("public.venueTitle")} section="venue"
           ornament={orn.sectionOrnament}
           className="border-t border-(--inv-accent)/20"
         >
@@ -196,7 +196,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
         </InvSection>
 
         {design.showGiftInfo && design.giftNote ? (
-          <InvSection align="left" title={t("public.giftTitle")} ornament={orn.sectionOrnament}>
+          <InvSection align="left" title={t("public.giftTitle")} section="gift" ornament={orn.sectionOrnament}>
             <GiftNote note={design.giftNote} />
           </InvSection>
         ) : null}
@@ -204,7 +204,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
         {design.showRsvp ? (
           <InvSection align="left"
             id="rsvp"
-            title={t("public.rsvpTitle")}
+            title={t("public.rsvpTitle")} section="rsvp"
             ornament={orn.sectionOrnament}
             className="border-t border-(--inv-accent)/20 bg-(--inv-surface)/70"
           >
@@ -213,7 +213,7 @@ export function ReachnyTemplate({ event, guestName }: TemplateProps) {
         ) : null}
 
         {event.contacts.length > 0 ? (
-          <InvSection align="left" title={t("public.contactHosts")} ornament="rule">
+          <InvSection align="left" title={t("public.contactHosts")} section="contacts" ornament="rule">
             <ContactList contacts={event.contacts} />
           </InvSection>
         ) : null}

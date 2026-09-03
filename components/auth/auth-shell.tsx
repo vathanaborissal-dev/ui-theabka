@@ -85,30 +85,14 @@ export function AuthShell({
   )
 }
 
-/** The shared "accounts aren't wired up yet" notice. */
-export function NotConfiguredNotice() {
-  const { locale } = useLocale()
+/** Server-reported failure, shown above the form it belongs to. */
+export function FormNotice({ message }: { message: string }) {
   return (
     <div
-      role="status"
-      className="rounded-[var(--card-radius)] border border-warning/40 bg-warning/8 px-4 py-3 text-sm"
+      role="alert"
+      className="rounded-[var(--card-radius)] border border-destructive/40 bg-destructive/8 px-4 py-3 text-sm text-foreground"
     >
-      <p className="font-medium text-foreground">
-        {locale === "km" ? "គណនីមិនទាន់ភ្ជាប់នៅឡើយ" : "Accounts aren’t connected yet"}
-      </p>
-      <p className="mt-1 leading-relaxed text-muted-foreground">
-        {locale === "km" ? (
-          <>ផ្នែកខាងក្រោយកំពុងសាងសង់។ អ្នកអាចមើលកម្មវិធីជាសាកល្បងបាន។</>
-        ) : (
-          <>The API is still being built. You can explore the app in demo mode meanwhile.</>
-        )}
-      </p>
-      <Link
-        href="/events"
-        className="mt-2 inline-block font-medium text-primary underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        {locale === "km" ? "បន្តទៅកម្មវិធីសាកល្បង" : "Continue to the demo"}
-      </Link>
+      {message}
     </div>
   )
 }

@@ -1,10 +1,11 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
 import { CalendarX2 } from "lucide-react"
 import { LocaleProvider } from "@/components/providers/locale-provider"
-import { useData } from "@/components/providers/data-provider"
+import type { InvitationEvent } from "@/lib/types"
+import type { InvitedGuest } from "@/lib/guests"
+import { RsvpProvider } from "./rsvp-context"
 import { InvitationRenderer } from "./invitation-renderer"
 import { InvitationLanguageToggle } from "./language-toggle"
 
@@ -17,30 +18,33 @@ import { InvitationLanguageToggle } from "./language-toggle"
  * first.
  */
 export function PublicInvitation({
+  event,
   slug,
-  guestToken,
+  token,
+  guest,
 }: {
+  event: InvitationEvent | null
   slug: string
-  guestToken?: string
+  /** From `?g=`; absent when the plain link was forwarded on. */
+  token?: string
+  /** Resolved server-side, so the card is already personalised on first paint. */
+  guest?: InvitedGuest | null
 }) {
-  const { events, guests } = useData()
-  const event = events.find((e) => e.slug === slug || e.id === slug)
-
   if (!event) return <InvitationNotFound />
-
-  const guest = guestToken ? guests.find((g) => g.id === guestToken) : undefined
 
   return (
     <LocaleProvider initialLocale="km" persist={false}>
-      <div className="relative min-h-svh">
-        <InvitationLanguageToggle />
-        <InvitationRenderer
-          event={event}
-          guestName={guest?.name}
-          motionEnabled
-          guestActions
-        />
-      </div>
+      <RsvpProvider value={{ slug, token, guest: guest ?? null }}>
+        <div className="relative min-h-svh">
+          <InvitationLanguageToggle />
+          <InvitationRenderer
+            event={event}
+            motionEnabled
+            guestActions
+            guest={guest}
+          />
+        </div>
+      </RsvpProvider>
     </LocaleProvider>
   )
 }

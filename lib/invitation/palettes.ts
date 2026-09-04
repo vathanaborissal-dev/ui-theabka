@@ -298,3 +298,55 @@ export function getPalette(id: string) {
 export function paletteStyle(id: string): React.CSSProperties {
   return getPalette(id).vars as unknown as React.CSSProperties
 }
+
+/* ---------------------------------------------------------------------------
+ * Rendering a palette on flat paper.
+ *
+ * Some palettes are built for type that sits over a photograph or a video —
+ * `on-video` and `emerald-gold` carry alpha in their surfaces, and `gold-ivory`
+ * inks its text in gold because a cover photo is behind it. Anywhere a palette
+ * is shown as a flat card with nothing behind it — a preview chip, a marketing
+ * sample — those choices need adjusting or the card renders see-through or
+ * unreadable.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Ink for palettes whose own `--inv-fg` is drawn for media rather than paper.
+ *
+ * Measured on a flat surface: every palette here clears 10:1 with its own
+ * `--inv-fg` on its own ground — the dark ones included, because they define a
+ * light ink — except `gold-ivory`, whose #B08E4F on #fffaf2 lands at 2.96:1.
+ * That is right over Sompeah's full-bleed cover and unreadable as a flat label,
+ * so it borrows that palette's own accent-contrast.
+ *
+ * A future palette built for video or photography belongs here too.
+ */
+const PAPER_INK: Record<string, string> = {
+  "gold-ivory": "#49351e",
+}
+
+/**
+ * The text colours to use when this palette is rendered on flat paper.
+ *
+ * `muted` is derived from the ink rather than taken from `--inv-muted`, so it
+ * steps toward the ground in whichever direction that ground lies — lighter on
+ * the paper palettes, darker on the midnight ones.
+ *
+ * Both resolve through `var()`, so the element (or an ancestor) must carry
+ * `paletteStyle(id)`.
+ */
+export function paperInks(id: string) {
+  const ink = PAPER_INK[getPalette(id).id] ?? "var(--inv-fg)"
+  return { ink, muted: `color-mix(in oklab, ${ink} 74%, var(--inv-bg))` }
+}
+
+/**
+ * Layered background for a flat card: the palette's surface over its own
+ * background over whatever opaque colour the element already carries.
+ *
+ * Two `linear-gradient` stops rather than two nested elements, so a palette
+ * that expects a backdrop behind its card gets one and composites the way it
+ * was designed to, instead of letting the page show through.
+ */
+export const PAPER_GROUND =
+  "linear-gradient(var(--inv-surface), var(--inv-surface)), linear-gradient(var(--inv-bg), var(--inv-bg))"

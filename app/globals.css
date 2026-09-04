@@ -449,6 +449,31 @@
   }
 }
 
+/*
+ * Khmer display leading.
+ *
+ * Khmer needs more room between lines than Latin at the same size, for the same
+ * reason the base rule gives body copy 1.85 — subscripts and vowel signs stack
+ * above and below the baseline. But 1.85 at headline sizes opens gaps you could
+ * park another line in, so display type sits between the two.
+ *
+ * In `utilities` rather than `components` because Tailwind's named size classes
+ * set a line-height as well as a font-size, and `text-2xl` in a later layer
+ * beats anything in `components`. Here the same layer applies and `.display` +
+ * `:lang(km)` simply outweighs a single utility class — which is why this needs
+ * no `!important`, unlike the letter-spacing rule above.
+ *
+ * Reaches only headings that carry `lang`. That attribute is doing double duty:
+ * it is also what lets the tracking rule above find them, and a Khmer display
+ * heading without it keeps `--display-tracking` — negative tracking, which
+ * splits Khmer clusters from their subscripts.
+ */
+@layer utilities {
+  .display:lang(km) {
+    line-height: 1.45;
+  }
+}
+
 /* ---------------------------------------------------------------------------
    Print.
 
